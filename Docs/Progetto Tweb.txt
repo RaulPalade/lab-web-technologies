@@ -1,0 +1,19 @@
+Visualizza Utenti:	ArrayList<User> queryUsers()
+Visualizza Docenti	ArrayList<Teacher> queryTeachers()
+Visualizza Corsi: 	ArrayList<Course> queryCourses()
+------------------
+SOLO AMMINISTRATORE
+Inserisci Corso:	void insertCourse(Course)
+Rimuovi Corso		void removeCourse(Course)		
+Inserisci Utente	void insertUser(User)
+Rimuovi Utente		void removeUser(User)
+Inserisci Docente	void insertTeacher(Teacher)
+Rimuovi Docente		void removeTeacher(Teacher)
+------------------
+Assegna Corso a Docente			void assignTeaching(Teacher, Course)
+Rimuovi Corso a Docente			void removeTeaching(Teacher, Course)
+Visualizza Corsi per Docente	void viewTeacherByCourse(Course)
+Inserisci Prenotazione Utente	void insertBooking(User, Teacher, Course, TimeSlot)
+Rimuovi Prenotazione Utente		void removeBooking(User, Teacher, Course, TimeSlot)
+------------------
+Visualizza ripetizioni per Utente (Attiva, Effettuata, Disdetta)
