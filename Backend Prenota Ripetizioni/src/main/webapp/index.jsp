@@ -11,6 +11,8 @@
     <title>Title</title>
 </head>
 <body>
-<h1>HELLO</h1>
+<h1>HELLO SERVLET JSP</h1>
+<button><a href="${pageContext.request.contextPath}/course.jsp">COURSE</a></button>
+<button><a href="${pageContext.request.contextPath}/booking.jsp">BOOKING</a></button>
 </body>
 </html>

@@ -97,7 +97,6 @@ public class DAO {
             PreparedStatement statement = connection.prepareStatement("select * from course where active = ?");
             statement.setBoolean(1, true);
             ResultSet resultSet = statement.executeQuery();
-            System.out.println(resultSet.wasNull());
             while (resultSet.next()) {
                 Course course = new Course(resultSet.getString("Title"));
                 courses.add(course);
