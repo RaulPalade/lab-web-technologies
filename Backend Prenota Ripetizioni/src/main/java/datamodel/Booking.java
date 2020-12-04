@@ -8,7 +8,7 @@ public class Booking {
     private TeacherCourse teacherCourse;
     private boolean deleted;
     private boolean completed;
-
+    
     public Booking(User user, TimeSlot timeSlot, TeacherCourse teacherCourse, boolean deleted, boolean completed) {
         this.user = user;
         this.timeSlot = timeSlot;

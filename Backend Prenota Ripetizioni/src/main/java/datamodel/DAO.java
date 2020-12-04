@@ -1,6 +1,7 @@
 package datamodel;
 
 import org.jetbrains.annotations.NotNull;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -15,6 +16,7 @@ public class DAO {
     private static final String DATABASE_URL = "jdbc:mysql://localhost:3306/prenotaripetizioni";
     private static final String MYSQL_USER = "root";
     private static final String MYSQL_PASSWORD = "";
+    private static final int SALT = 12;
 
     public static void registerDriver() {
         try {
@@ -23,6 +25,35 @@ public class DAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean loginUser(User user) {
+        Connection connection = null;
+        boolean loginResult = false;
+        String salt = BCrypt.gensalt(SALT);
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("select Email, Password from user where Email = ?");
+            statement.setString(1, user.getEmail());
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                loginResult = resultSet.getString(1).equals(user.getEmail()) &&
+                        BCrypt.checkpw(user.getPassword(), resultSet.getString(2));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return loginResult;
     }
 
     public static @NotNull ArrayList<User> queryUsers() {
@@ -165,10 +196,12 @@ public class DAO {
     public static boolean insertUser(User user) {
         Connection connection = null;
         int rowAffected = 0;
+        String salt = BCrypt.gensalt(SALT);
 
         try {
             connection = DAO.connect();
-            String hashedPassword = hashPassword(user.getPassword());
+            String hashedPassword = BCrypt.hashpw(user.getPassword(), salt);
+            System.out.println(hashedPassword);
             PreparedStatement statement = connection.prepareStatement("insert into user (Name, Surname, Email, Password, Administrator) values (?, ?, ?, ?, ?)");
             statement.setString(1, user.getName());
             statement.setString(2, user.getSurname());
@@ -176,7 +209,7 @@ public class DAO {
             statement.setString(4, hashedPassword);
             statement.setBoolean(5, user.isAmministratore());
             rowAffected = statement.executeUpdate();
-        } catch (SQLException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             if (connection != null) {
@@ -451,17 +484,17 @@ public class DAO {
     public static boolean insertTeacher(Teacher teacher) {
         Connection connection = null;
         int rowAffected = 0;
-
+        String salt = BCrypt.gensalt(SALT);
         try {
             connection = DAO.connect();
-            String hashedPassword = hashPassword(teacher.getPassword());
+            String hashedPassword = BCrypt.hashpw(teacher.getPassword(), salt);
             PreparedStatement statement = connection.prepareStatement("insert into teacher (Name, Surname, Email, Password) values (?, ?, ?, ?)");
             statement.setString(1, teacher.getName());
             statement.setString(2, teacher.getSurname());
             statement.setString(3, teacher.getEmail());
             statement.setString(4, hashedPassword);
             rowAffected = statement.executeUpdate();
-        } catch (SQLException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             if (connection != null) {
@@ -762,42 +795,7 @@ public class DAO {
     }
 
     private static Connection connect() throws SQLException {
-        Connection connection = DriverManager.getConnection(DATABASE_URL, MYSQL_USER, MYSQL_PASSWORD);
-        if (connection != null) {
-            //System.out.println("Connected to Prenota Ripetizioni database");
-        }
-
-        return connection;
+        return DriverManager.getConnection(DATABASE_URL, MYSQL_USER, MYSQL_PASSWORD);
     }
-
-    private static String hashPassword(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        int iterations = 1000;
-        int keyLength = 512;
-        char[] chars = password.toCharArray();
-        byte[] salt = getSalt();
-
-        PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, keyLength);
-        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        byte[] hash = skf.generateSecret(spec).getEncoded();
-        return toHex(salt) + ":" + toHex(hash);
-    }
-
-    private static byte[] getSalt() throws NoSuchAlgorithmException {
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-        byte[] salt = new byte[16];
-        sr.nextBytes(salt);
-        return salt;
-    }
-
-    private static String toHex(byte[] array) {
-        BigInteger bi = new BigInteger(1, array);
-        String hex = bi.toString(16);
-        int paddingLength = (array.length * 2) - hex.length();
-        if (paddingLength > 0) {
-            return String.format("%0" + paddingLength + "d", 0) + hex;
-        } else {
-            return hex;
-        }
-    }
-
+    
 }
