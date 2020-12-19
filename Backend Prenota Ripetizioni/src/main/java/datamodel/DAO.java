@@ -60,7 +60,6 @@ public class DAO {
     public static boolean loginUser(User user) {
         Connection connection = null;
         boolean loginResult = false;
-        String salt = BCrypt.gensalt(SALT);
 
         try {
             connection = DAO.connect();
@@ -117,13 +116,13 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean removeUser(User user) {
+    public static boolean deactivateUser(User user) {
         Connection connection = null;
         int rowAffected = 0;
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update user set Active = 0 where Name = ? AND Surname = ? AND Email = ?");
+            PreparedStatement statement = connection.prepareStatement("update user set Active = 0 where Name = ? and Surname = ? and Email = ?");
             statement.setString(1, user.getName());
             statement.setString(2, user.getSurname());
             statement.setString(3, user.getEmail());
@@ -149,7 +148,7 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update user set Active = 1 where Name = ? AND Surname = ? AND Email = ?");
+            PreparedStatement statement = connection.prepareStatement("update user set Active = 1 where Name = ? and Surname = ? and Email = ?");
             statement.setString(1, user.getName());
             statement.setString(2, user.getSurname());
             statement.setString(3, user.getEmail());
@@ -228,13 +227,13 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean removeTeacher(Teacher teacher) {
+    public static boolean deactivateTeacher(Teacher teacher) {
         Connection connection = null;
         int rowAffected = 0;
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update teacher set Active = 0 where Name = ? AND Surname = ? AND Email = ?");
+            PreparedStatement statement = connection.prepareStatement("update teacher set Active = 0 where Name = ? and Surname = ? and Email = ?");
             statement.setString(1, teacher.getName());
             statement.setString(2, teacher.getSurname());
             statement.setString(3, teacher.getEmail());
@@ -260,7 +259,7 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update teacher set Active = 1 where Name = ? AND Surname = ? AND Email = ?");
+            PreparedStatement statement = connection.prepareStatement("update teacher set Active = 1 where Name = ? and Surname = ? and Email = ?");
             statement.setString(1, teacher.getName());
             statement.setString(2, teacher.getSurname());
             statement.setString(3, teacher.getEmail());
@@ -331,12 +330,12 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean removeCourse(Course course) {
+    public static boolean deactivateCourse(Course course) {
         Connection connection = null;
         int rowAffected = 0;
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update course set Active = 0 WHERE Title = ?;");
+            PreparedStatement statement = connection.prepareStatement("update course set Active = 0 where Title = ?;");
             statement.setString(1, course.getTitle());
             rowAffected = statement.executeUpdate();
         } catch (SQLException e) {
@@ -384,7 +383,7 @@ public class DAO {
     }
 
     // TODO (2): Define remove time slot method
-    public static boolean removeTimeSlot(TimeSlot timeSlot) {
+    public static boolean deactivateTimeSlot(TimeSlot timeSlot) {
         return false;
     }
 
@@ -451,7 +450,7 @@ public class DAO {
         int idCourse = getIdCourse(course.getTitle());
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("insert into teacher_course (IdTeacher, IdCourse) VALUES (?, ?)");
+            PreparedStatement statement = connection.prepareStatement("insert into teacher_course (IdTeacher, IdCourse) values (?, ?)");
             statement.setInt(1, idTeacher);
             statement.setInt(2, idCourse);
             rowAffected = statement.executeUpdate();
@@ -470,7 +469,7 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean removeTeaching(Teacher teacher, Course course) {
+    public static boolean deactivateTeaching(Teacher teacher, Course course) {
         Connection connection = null;
         int rowAffected = 0;
 
@@ -479,7 +478,7 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update teacher_course set Active = 0 where IdTeacher = ? AND IdCourse = ?");
+            PreparedStatement statement = connection.prepareStatement("update teacher_course set Active = 0 where IdTeacher = ? and IdCourse = ?");
             statement.setInt(1, idTeacher);
             statement.setInt(2, idCourse);
             rowAffected = statement.executeUpdate();
@@ -498,7 +497,7 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean activateTeacherCourse(TeacherCourse teacherCourse) {
+    public static boolean activateTeaching(TeacherCourse teacherCourse) {
         Connection connection = null;
         int rowAffected = 0;
 
@@ -507,7 +506,7 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update teacher_course set Active = 1 where IdTeacher = ? AND IdCourse = ?");
+            PreparedStatement statement = connection.prepareStatement("update teacher_course set Active = 1 where IdTeacher = ? and IdCourse = ?");
             statement.setInt(1, idTeacher);
             statement.setInt(2, idCourse);
             rowAffected = statement.executeUpdate();
@@ -639,7 +638,7 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update booking set Deleted = 1, Completed = 1 where IdUser = ? and IdTimeSlot = ? and IdTeacher = ? AND IdCourse = ?");
+            PreparedStatement statement = connection.prepareStatement("update booking set Deleted = 1, Completed = 1 where IdUser = ? and IdTimeSlot = ? and IdTeacher = ? and IdCourse = ?");
             statement.setInt(1, idUser);
             statement.setInt(2, idTimeSlot);
             statement.setInt(3, idTeacher);
