@@ -2,6 +2,9 @@ package datamodel;
 
 import java.util.Objects;
 
+/**
+ * @author Raul Palade
+ */
 public class TimeSlot {
     private String day;
     private int hour;

@@ -13,6 +13,11 @@ import java.util.ArrayList;
 
 
 // TODO (1): Control administrator access to resources
+// TODO (2): Add control for duplicate user, teacher, course, teachercourse, timeslot
+
+/**
+ * @author Raul Palade
+ */
 @WebServlet(name = "ServletController", urlPatterns = {"/ServletController"})
 public class ServletController extends HttpServlet {
 
@@ -70,6 +75,24 @@ public class ServletController extends HttpServlet {
                     break;
 
                 case "insert-user":
+                    String name = request.getParameter("name");
+                    String surname = request.getParameter("surname");
+                    String email = request.getParameter("email");
+                    boolean administrator = Boolean.parseBoolean(request.getParameter("administrator"));
+
+                    String password = "password1";
+
+                    if (name != null && surname != null && email != null) {
+                        if (DAO.insertUser(new User(name, surname, email, password, administrator))) {
+                            System.out.println("User Registered");
+                            response.setStatus(201);
+                        } else {
+                            if (DAO.checkIfUserExists(new User(name, surname, email, password, administrator))) {
+                                System.out.println("User already exists");
+                                response.sendError(409);
+                            }
+                        }
+                    }
                     break;
 
                 case "insert-teacher":
@@ -124,72 +147,58 @@ public class ServletController extends HttpServlet {
                     break;
             }
         } else {
-            System.err.println("NULL ACTION");
+            response.sendError(400, "Bad Request");
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
         String action = request.getParameter("action");
         PrintWriter out = response.getWriter();
-
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            System.out.println("Non loggato");
-            response.sendError(401, "Unauthorized");
-        } else {
+        if (action != null) {
             switch (action) {
                 case "list-users":
                     ArrayList<User> users = DAO.queryUsers();
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
                     out.println(gson.toJson(users));
                     out.flush();
                     break;
 
                 case "list-teachers":
                     ArrayList<Teacher> teachers = DAO.queryTeachers();
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
                     out.println(gson.toJson(teachers));
                     out.flush();
                     break;
 
                 case "list-courses":
                     ArrayList<Course> courses = DAO.queryCourses();
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
                     out.println(gson.toJson(courses));
                     out.flush();
                     break;
 
                 case "list-teacher-courses":
                     ArrayList<TeacherCourse> teacherCourses = DAO.queryTeacherCourse();
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
                     out.println(gson.toJson(teacherCourses));
                     out.flush();
                     break;
 
                 case "list-bookings":
                     ArrayList<Booking> bookings = DAO.queryBookings();
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
                     out.println(gson.toJson(bookings));
                     out.flush();
                     break;
 
                 case "list-teacher-by-course":
                     ArrayList<Teacher> teacherByCourse = new ArrayList<>();
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
                     out.println(gson.toJson(teacherByCourse));
                     out.flush();
                     break;
             }
+        } else {
+            response.sendError(400, "Bad Request");
         }
     }
 }

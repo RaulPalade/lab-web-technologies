@@ -6,10 +6,13 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * @author Raul Palade
+ */
 public class DAO {
-    private static final String DATABASE_URL = "jdbc:mysql://localhost:3306/prenotaripetizioni";
+    private static final String DATABASE_URL = "jdbc:mysql://localhost:3306/lessonscheduling";
     private static final String MYSQL_USER = "root";
-    private static final String MYSQL_PASSWORD = "";
+    public static final String MYSQL_PASSWORD = "";
     private static final int SALT = 12;
 
     public static void registerDriver() {
@@ -58,6 +61,10 @@ public class DAO {
     }
 
     public static boolean loginUser(User user) {
+        if (user == null) {
+            return false;
+        }
+
         Connection connection = null;
         boolean loginResult = false;
 
@@ -86,6 +93,10 @@ public class DAO {
     }
 
     public static boolean insertUser(User user) {
+        if (user == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
         String salt = BCrypt.gensalt(SALT);
@@ -116,16 +127,25 @@ public class DAO {
         return rowAffected != 0;
     }
 
+    public static boolean activateUser(User user) {
+        return user != null && changeUserStatus(user, true);
+    }
+
     public static boolean deactivateUser(User user) {
+        return user != null && changeUserStatus(user, false);
+    }
+
+    private static boolean changeUserStatus(User user, boolean status) {
         Connection connection = null;
         int rowAffected = 0;
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update user set Active = 0 where Name = ? and Surname = ? and Email = ?");
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getSurname());
-            statement.setString(3, user.getEmail());
+            PreparedStatement statement = connection.prepareStatement("update user set Active = ? where Name = ? and Surname = ? and Email = ?");
+            statement.setBoolean(1, status);
+            statement.setString(2, user.getName());
+            statement.setString(3, user.getSurname());
+            statement.setString(4, user.getEmail());
             rowAffected = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -142,17 +162,22 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean activateUser(User user) {
+    public static boolean checkIfUserExists(User user) {
+        if (user == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update user set Active = 1 where Name = ? and Surname = ? and Email = ?");
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getSurname());
-            statement.setString(3, user.getEmail());
-            rowAffected = statement.executeUpdate();
+            PreparedStatement statement = connection.prepareStatement("select exists (select * from user where Email = ?)");
+            statement.setString(1, user.getEmail());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                rowAffected = resultSet.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -200,6 +225,10 @@ public class DAO {
     }
 
     public static boolean insertTeacher(Teacher teacher) {
+        if (teacher == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
         String salt = BCrypt.gensalt(SALT);
@@ -227,16 +256,25 @@ public class DAO {
         return rowAffected != 0;
     }
 
+    public static boolean activateTeacher(Teacher teacher) {
+        return teacher != null && changeTeacherStatus(teacher, true);
+    }
+
     public static boolean deactivateTeacher(Teacher teacher) {
+        return teacher != null && changeTeacherStatus(teacher, false);
+    }
+
+    private static boolean changeTeacherStatus(Teacher teacher, boolean status) {
         Connection connection = null;
         int rowAffected = 0;
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update teacher set Active = 0 where Name = ? and Surname = ? and Email = ?");
-            statement.setString(1, teacher.getName());
-            statement.setString(2, teacher.getSurname());
-            statement.setString(3, teacher.getEmail());
+            PreparedStatement statement = connection.prepareStatement("update teacher set Active = ? where Name = ? and Surname = ? and Email = ?");
+            statement.setBoolean(1, status);
+            statement.setString(2, teacher.getName());
+            statement.setString(3, teacher.getSurname());
+            statement.setString(4, teacher.getEmail());
             rowAffected = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -253,17 +291,22 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean activateTeacher(Teacher teacher) {
+    public static boolean checkIfTeacherExists(Teacher teacher) {
+        if (teacher == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update teacher set Active = 1 where Name = ? and Surname = ? and Email = ?");
-            statement.setString(1, teacher.getName());
-            statement.setString(2, teacher.getSurname());
-            statement.setString(3, teacher.getEmail());
-            rowAffected = statement.executeUpdate();
+            PreparedStatement statement = connection.prepareStatement("select exists (select * from teacher where Email = ?)");
+            statement.setString(1, teacher.getEmail());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                rowAffected = resultSet.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -308,6 +351,10 @@ public class DAO {
     }
 
     public static boolean insertCourse(Course course) {
+        if (course == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
         try {
@@ -330,37 +377,22 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean deactivateCourse(Course course) {
-        Connection connection = null;
-        int rowAffected = 0;
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update course set Active = 0 where Title = ?;");
-            statement.setString(1, course.getTitle());
-            rowAffected = statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return rowAffected != 0;
-    }
-
     public static boolean activateCourse(Course course) {
+        return course != null && changeCourseStatus(course, true);
+    }
+
+    public static boolean deactivateCourse(Course course) {
+        return course != null && changeCourseStatus(course, false);
+    }
+
+    private static boolean changeCourseStatus(Course course, boolean status) {
         Connection connection = null;
         int rowAffected = 0;
-
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update course set Active = 1 where Title = ?");
-            statement.setString(1, course.getTitle());
+            PreparedStatement statement = connection.prepareStatement("update course set Active = ? where Title = ?;");
+            statement.setBoolean(1, status);
+            statement.setString(2, course.getTitle());
             rowAffected = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -377,26 +409,116 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    // TODO (1): Define insert time slot method
-    public static boolean insertTimeSlot(TimeSlot timeSlot) {
-        return false;
-    }
+    public static boolean checkIfCourseExists(Course course) {
+        if (course == null) {
+            return false;
+        }
 
-    // TODO (2): Define remove time slot method
-    public static boolean deactivateTimeSlot(TimeSlot timeSlot) {
-        return false;
-    }
-
-    public static boolean activateTimeSlot(TimeSlot timeSlot) {
         Connection connection = null;
         int rowAffected = 0;
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update time_slot set Active = 1 where Day = ? and Hour = ?");
+            PreparedStatement statement = connection.prepareStatement("select exists (select * from course where Title = ?)");
+            statement.setString(1, course.getTitle());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                rowAffected = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return rowAffected != 0;
+    }
+
+    public static boolean insertTimeSlot(TimeSlot timeSlot) {
+        if (timeSlot == null) {
+            return false;
+        }
+
+        Connection connection = null;
+        int rowAffected = 0;
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("insert into time_slot (Day, Hour) values (?, ?)");
             statement.setString(1, timeSlot.getDay());
             statement.setInt(2, timeSlot.getHour());
             rowAffected = statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return rowAffected != 0;
+    }
+
+    public static boolean activateTimeSlot(TimeSlot timeSlot) {
+        return timeSlot != null && changeTimeSlotStatus(timeSlot, true);
+    }
+
+    public static boolean deactivateTimeSlot(TimeSlot timeSlot) {
+        return timeSlot != null && changeTimeSlotStatus(timeSlot, false);
+    }
+
+    private static boolean changeTimeSlotStatus(TimeSlot timeSlot, boolean status) {
+        Connection connection = null;
+        int rowAffected = 0;
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("update time_slot set Active = ? where Day = ? and Hour = ?");
+            statement.setBoolean(1, status);
+            statement.setString(2, timeSlot.getDay());
+            statement.setInt(3, timeSlot.getHour());
+            rowAffected = statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return rowAffected != 0;
+    }
+
+    public static boolean checkIfTimeSlotExists(TimeSlot timeSlot) {
+        if (timeSlot == null) {
+            return false;
+        }
+
+        Connection connection = null;
+        int rowAffected = 0;
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("select exists (select * from time_slot where Day = ? and Hour = ?)");
+            statement.setString(1, timeSlot.getDay());
+            statement.setInt(2, timeSlot.getHour());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                rowAffected = resultSet.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -443,6 +565,10 @@ public class DAO {
     }
 
     public static boolean assignTeaching(Teacher teacher, Course course) {
+        if (teacher == null || course == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
 
@@ -469,18 +595,27 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean deactivateTeaching(Teacher teacher, Course course) {
+    public static boolean activateTeaching(TeacherCourse teacherCourse) {
+        return teacherCourse != null && changeTeachingStatus(teacherCourse, true);
+    }
+
+    public static boolean deactivateTeaching(TeacherCourse teacherCourse) {
+        return teacherCourse != null && changeTeachingStatus(teacherCourse, false);
+    }
+
+    private static boolean changeTeachingStatus(TeacherCourse teacherCourse, boolean status) {
         Connection connection = null;
         int rowAffected = 0;
 
-        int idTeacher = getIdTeacher(teacher.getEmail());
-        int idCourse = getIdCourse(course.getTitle());
+        int idTeacher = getIdTeacher(teacherCourse.getTeacher().getEmail());
+        int idCourse = getIdCourse(teacherCourse.getCourse().getTitle());
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update teacher_course set Active = 0 where IdTeacher = ? and IdCourse = ?");
-            statement.setInt(1, idTeacher);
-            statement.setInt(2, idCourse);
+            PreparedStatement statement = connection.prepareStatement("update teacher_course set Active = ? where IdTeacher = ? and IdCourse = ?");
+            statement.setBoolean(1, status);
+            statement.setInt(2, idTeacher);
+            statement.setInt(3, idCourse);
             rowAffected = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -497,7 +632,11 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean activateTeaching(TeacherCourse teacherCourse) {
+    public static boolean checkIfTeachingExists(TeacherCourse teacherCourse) {
+        if (teacherCourse == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
 
@@ -506,10 +645,13 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update teacher_course set Active = 1 where IdTeacher = ? and IdCourse = ?");
+            PreparedStatement statement = connection.prepareStatement("select exists (select * from teacher_course where IdTeacher = ? and IdCourse = ?)");
             statement.setInt(1, idTeacher);
             statement.setInt(2, idCourse);
-            rowAffected = statement.executeUpdate();
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                rowAffected = resultSet.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -526,6 +668,10 @@ public class DAO {
     }
 
     public static ArrayList<Teacher> viewTeacherByCourse(Course course) {
+        if (course == null) {
+            return new ArrayList<>();
+        }
+
         Connection connection = null;
         int idCourse = getIdCourse(course.getTitle());
         ArrayList<Teacher> teachers = new ArrayList<>();
@@ -596,6 +742,10 @@ public class DAO {
     }
 
     public static boolean insertBooking(User user, TimeSlot timeSlot, Teacher teacher, Course course) {
+        if (user == null || timeSlot == null || teacher == null || course == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
 
@@ -627,39 +777,15 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static boolean deleteBooking(User user, TimeSlot timeSlot, Teacher teacher, Course course) {
-        Connection connection = null;
-        int rowAffected = 0;
-
-        int idUser = getIdUser(user.getEmail());
-        int idTimeSlot = getIdTimeSlot(timeSlot.getDay(), timeSlot.getHour());
-        int idTeacher = getIdTeacher(teacher.getEmail());
-        int idCourse = getIdCourse(course.getTitle());
-
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update booking set Deleted = 1, Completed = 1 where IdUser = ? and IdTimeSlot = ? and IdTeacher = ? and IdCourse = ?");
-            statement.setInt(1, idUser);
-            statement.setInt(2, idTimeSlot);
-            statement.setInt(3, idTeacher);
-            statement.setInt(4, idCourse);
-            rowAffected = statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return rowAffected != 0;
+    public static boolean deleteBooking(Booking booking) {
+        return booking != null && changeBookingStatus(booking, true, false);
     }
 
     public static boolean completeBooking(Booking booking) {
+        return booking != null && changeBookingStatus(booking, false, true);
+    }
+
+    private static boolean changeBookingStatus(Booking booking, boolean deletedStatus, boolean completedStatus) {
         Connection connection = null;
         int rowAffected = 0;
 
@@ -670,11 +796,13 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("update booking set Completed = 1 where IdUser = ? and IdTimeSlot = ? and IdTeacher = ? and IdCourse = ?");
-            statement.setInt(1, idUser);
-            statement.setInt(1, idTimeSlot);
-            statement.setInt(1, idTeacher);
-            statement.setInt(2, idCourse);
+            PreparedStatement statement = connection.prepareStatement("update booking set Deleted = ?, Completed = ? where IdUser = ? and IdTimeSlot = ? and IdTeacher = ? and IdCourse = ?");
+            statement.setBoolean(1, deletedStatus);
+            statement.setBoolean(2, completedStatus);
+            statement.setInt(3, idUser);
+            statement.setInt(4, idTimeSlot);
+            statement.setInt(5, idTeacher);
+            statement.setInt(6, idCourse);
             rowAffected = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

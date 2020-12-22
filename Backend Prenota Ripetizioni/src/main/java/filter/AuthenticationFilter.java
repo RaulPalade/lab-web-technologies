@@ -1,4 +1,4 @@
-/*
+
 package filter;
 
 import java.io.IOException;
@@ -15,7 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-@WebFilter(filterName = "/AuthenticationFilter", urlPatterns = {"/*"})
+/**
+ * @author Raul Palade
+ */
+@WebFilter(filterName = "AuthenticationFilter", urlPatterns = {"/*"})
 public class AuthenticationFilter implements Filter {
 
     private ServletContext context;
@@ -31,18 +34,21 @@ public class AuthenticationFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
+        String action = request.getParameter("action");
 
         String uri = req.getRequestURI();
         this.context.log("Requested Resource::" + uri);
 
         HttpSession session = req.getSession(false);
 
-        if (session == null && !(uri.endsWith("html") || uri.endsWith("LoginServlet"))) {
-            this.context.log("Unauthorized access request");
-            res.sendError(401, "Unauthorized access request");
-        } else {
-            // pass the request along the filter chain
-            chain.doFilter(request, response);
+        if (action != null) {
+            if (session == null && (!action.equals("login") && !action.equals("logout")) && !(uri.endsWith("html") || uri.endsWith("LoginServlet"))) {
+                this.context.log("Unauthorized access request");
+                res.sendError(401, "Unauthorized access request");
+            } else {
+                // pass the request along the filter chain
+                chain.doFilter(request, response);
+            }
         }
     }
-}*/
+}

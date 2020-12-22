@@ -2,19 +2,28 @@ package datamodel;
 
 import java.util.Objects;
 
+/**
+ * @author Raul Palade
+ */
 public class Booking {
     private User user;
     private TimeSlot timeSlot;
     private TeacherCourse teacherCourse;
     private boolean deleted;
     private boolean completed;
-    
+
     public Booking(User user, TimeSlot timeSlot, TeacherCourse teacherCourse, boolean deleted, boolean completed) {
         this.user = user;
         this.timeSlot = timeSlot;
         this.teacherCourse = teacherCourse;
         this.deleted = deleted;
         this.completed = completed;
+    }
+
+    public Booking(User user, TimeSlot timeSlot, TeacherCourse teacherCourse) {
+        this.user = user;
+        this.timeSlot = timeSlot;
+        this.teacherCourse = teacherCourse;
     }
 
     public User getUser() {

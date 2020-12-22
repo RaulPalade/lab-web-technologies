@@ -2,6 +2,9 @@ package datamodel;
 
 import java.util.Objects;
 
+/**
+ * @author Raul Palade
+ */
 public class Course {
     private final String title;
 

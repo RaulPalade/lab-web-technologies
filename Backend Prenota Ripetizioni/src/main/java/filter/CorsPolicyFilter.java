@@ -8,8 +8,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 
-@WebFilter(asyncSupported = true, urlPatterns = {"/*"})
-public class Filter implements javax.servlet.Filter {
+/**
+ * @author Raul Palade
+ */
+@WebFilter(filterName = "CorsFilter", asyncSupported = true, urlPatterns = {"/*"})
+public class CorsPolicyFilter implements javax.servlet.Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

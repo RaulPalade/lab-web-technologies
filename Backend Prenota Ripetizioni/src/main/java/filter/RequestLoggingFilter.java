@@ -15,9 +15,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Servlet Filter implementation class RequestLoggingFilter
+ * @author Raul Palade
  */
-@WebFilter("/RequestLoggingFilter")
+@WebFilter(filterName = "RequestLoggingFilter")
 public class RequestLoggingFilter implements Filter {
 
     private ServletContext context;
