@@ -7,7 +7,7 @@
     <groupId>com.web.backend.lessonscheduling</groupId>
     <artifactId>BackendLessonScheduling</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>Backend Prenota Ripetizioni</name>
+    <name>Backend Lesson Scheduling</name>
     <packaging>war</packaging>
 
     <properties>
