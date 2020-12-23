@@ -6,14 +6,10 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.util.ArrayList;
 
-/**
- * @author Raul Palade
- * @project Backend Lesson Scheduling
- */
 public class DAO {
     private static final String DATABASE_URL = "jdbc:mysql://localhost:3306/lessonscheduling";
     private static final String MYSQL_USER = "root";
-    private static final String MYSQL_PASSWORD = "";
+    public static final String MYSQL_PASSWORD = "";
     private static final int SALT = 12;
 
     public static void registerDriver() {
@@ -223,6 +219,35 @@ public class DAO {
         }
 
         return teachers;
+    }
+
+    // TODO (3) : complete query teacher availability method
+    public static ArrayList<TimeSlot> queryTeacherAvailability(Teacher teacher) {
+        Connection connection = null;
+        ArrayList<TimeSlot> availableSlots = new ArrayList<>();
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("select * from teacher where Email = ?");
+            statement.setString(1, teacher.getEmail());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                TimeSlot timeSlot = new TimeSlot(resultSet.getString(1), resultSet.getInt(2));
+                availableSlots.add(timeSlot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return availableSlots;
     }
 
     public static boolean insertTeacher(Teacher teacher) {
@@ -439,6 +464,11 @@ public class DAO {
         }
 
         return rowAffected != 0;
+    }
+
+    // TODO (2) : Complete query time slot method
+    public static ArrayList<TimeSlot> queryTimeSlots() {
+        return new ArrayList<>();
     }
 
     public static boolean insertTimeSlot(TimeSlot timeSlot) {
@@ -740,6 +770,46 @@ public class DAO {
         }
 
         return bookings;
+    }
+
+    public static ArrayList<Booking> queryPersonalBooking(User user) {
+        Connection connection = null;
+        ArrayList<Booking> personalBookings = new ArrayList<>();
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("select ts.Day, ts.Hour, t.Name, t.Surname, t.Email, c.Title, Deleted, Completed\n" +
+                    "from booking\n" +
+                    "         join user u on u.IdUser = booking.IdUser\n" +
+                    "         join time_slot ts on ts.IdTimeSlot = booking.IdTimeSlot\n" +
+                    "         join teacher_course tc on tc.IdTeacher = booking.IdTeacher and tc.IdCourse = booking.IdCourse\n" +
+                    "         join teacher t on t.IdTeacher = tc.IdTeacher\n" +
+                    "         join course c on c.IdCourse = tc.IdCourse\n" +
+                    "where u.Email = ?;");
+            statement.setString(1, user.getEmail());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                TimeSlot timeSlot = new TimeSlot(resultSet.getString(1), resultSet.getInt(2));
+                Teacher teacher = new Teacher(resultSet.getString(3), resultSet.getString(4), resultSet.getString(5));
+                Course course = new Course(resultSet.getString(6));
+                TeacherCourse teacherCourse = new TeacherCourse(teacher, course);
+
+                Booking booking = new Booking(timeSlot, teacherCourse, resultSet.getBoolean(7), resultSet.getBoolean(8));
+                personalBookings.add(booking);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return personalBookings;
     }
 
     public static boolean insertBooking(User user, TimeSlot timeSlot, Teacher teacher, Course course) {

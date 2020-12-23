@@ -36,6 +36,13 @@ public class User {
         this.password = password;
     }
 
+    public User(String name, String surname, String email, boolean administrator) {
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.administrator = administrator;
+    }
+
     public String getName() {
         return name;
     }

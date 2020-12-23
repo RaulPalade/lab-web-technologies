@@ -412,6 +412,14 @@ public class ServletController extends HttpServlet {
                     out.flush();
                     break;
 
+                case "list-teacher-availability":
+                    String teacherEmail = request.getParameter("teacher-email");
+                    if (teacherEmail != null) {
+                        ArrayList<TimeSlot> timeSlots = DAO.queryTeacherAvailability(new Teacher(teacherEmail));
+                        out.println(gson.toJson(timeSlots));
+                        out.flush();
+                    }
+
                 case "list-courses":
                     ArrayList<Course> courses = DAO.queryCourses();
                     out.println(gson.toJson(courses));
@@ -428,6 +436,18 @@ public class ServletController extends HttpServlet {
                     ArrayList<Booking> bookings = DAO.queryBookings();
                     out.println(gson.toJson(bookings));
                     out.flush();
+                    break;
+
+                case "list-personal-bookings":
+                    String userEmail = request.getParameter("user-email");
+                    if (userEmail != null) {
+                        ArrayList<Booking> personalBookings = DAO.queryPersonalBooking(new User(userEmail));
+                        out.println(gson.toJson(personalBookings));
+                        out.flush();
+                    } else {
+                        System.out.println("Null user-email parameter");
+                        response.sendError(401);
+                    }
                     break;
 
                 case "list-teacher-by-course":

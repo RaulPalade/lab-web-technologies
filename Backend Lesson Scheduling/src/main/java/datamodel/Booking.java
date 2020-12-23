@@ -21,6 +21,13 @@ public class Booking {
         this.completed = completed;
     }
 
+    public Booking(TimeSlot timeSlot, TeacherCourse teacherCourse, boolean deleted, boolean completed) {
+        this.timeSlot = timeSlot;
+        this.teacherCourse = teacherCourse;
+        this.deleted = deleted;
+        this.completed = completed;
+    }
+
     public Booking(User user, TimeSlot timeSlot, TeacherCourse teacherCourse) {
         this.user = user;
         this.timeSlot = timeSlot;
