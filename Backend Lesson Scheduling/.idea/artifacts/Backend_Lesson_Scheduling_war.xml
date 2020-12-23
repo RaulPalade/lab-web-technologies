@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="Backend Lesson Scheduling:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>Backend Lesson Scheduling</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="BackendLessonScheduling-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="Backend Lesson Scheduling:war exploded" />
+    </root>
+  </artifact>
+</component>
