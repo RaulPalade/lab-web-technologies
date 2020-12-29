@@ -6,6 +6,10 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * @author Raul Palade
+ * @project Backend Lesson Scheduling
+ */
 public class DAO {
     private static final String DATABASE_URL = "jdbc:mysql://localhost:3306/lessonscheduling";
     private static final String MYSQL_USER = "root";
@@ -87,6 +91,34 @@ public class DAO {
         }
 
         return loginResult;
+    }
+
+    public static boolean isAdmin(User user) {
+        Connection connection = null;
+        int rowAffected = 0;
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("select Administrator from user where active = ? and Email = ?");
+            statement.setBoolean(1, true);
+            statement.setString(2, user.getEmail());
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                rowAffected = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return rowAffected != 0;
     }
 
     public static boolean insertUser(User user) {
@@ -221,15 +253,29 @@ public class DAO {
         return teachers;
     }
 
-    // TODO (3) : complete query teacher availability method
     public static ArrayList<TimeSlot> queryTeacherAvailability(Teacher teacher) {
         Connection connection = null;
         ArrayList<TimeSlot> availableSlots = new ArrayList<>();
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select * from teacher where Email = ?");
-            statement.setString(1, teacher.getEmail());
+            PreparedStatement statement = connection.prepareStatement("select Day, Hour\n" +
+                    "from time_slot\n" +
+                    "where Active = ?\n" +
+                    "  and (Day, Hour) not in\n" +
+                    "      (select Day, Hour\n" +
+                    "       from teacher\n" +
+                    "                join booking b on teacher.IdTeacher = b.IdTeacher\n" +
+                    "                join time_slot ts on b.IdTimeSlot = ts.IdTimeSlot\n" +
+                    "       where teacher.Email = ?\n" +
+                    "         and teacher.Active = ?\n" +
+                    "         and Deleted = ?\n" +
+                    "         and Completed = ?);");
+            statement.setBoolean(1, true);
+            statement.setString(2, teacher.getEmail());
+            statement.setBoolean(3, true);
+            statement.setBoolean(4, false);
+            statement.setBoolean(5, false);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 TimeSlot timeSlot = new TimeSlot(resultSet.getString(1), resultSet.getInt(2));
@@ -466,9 +512,32 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    // TODO (2) : Complete query time slot method
     public static ArrayList<TimeSlot> queryTimeSlots() {
-        return new ArrayList<>();
+        Connection connection = null;
+        ArrayList<TimeSlot> timeSlots = new ArrayList<>();
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("select * from time_slot where active = ?");
+            statement.setBoolean(1, true);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                TimeSlot timeSlot = new TimeSlot(resultSet.getString("Day"), resultSet.getInt("Hour"));
+                timeSlots.add(timeSlot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return timeSlots;
     }
 
     public static boolean insertTimeSlot(TimeSlot timeSlot) {

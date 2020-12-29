@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-
-// TODO (1): Control administrator access to resources
-
 /**
  * @author Raul Palade
  * @project Backend Lesson Scheduling
@@ -90,6 +87,8 @@ public class ServletController extends HttpServlet {
                     break;
 
                 case "insert-user":
+                    System.out.println(request.getSession().getAttribute("emailUser"));
+
                     userName = request.getParameter("name");
                     userSurname = request.getParameter("surname");
                     userEmail = request.getParameter("email");
@@ -106,7 +105,10 @@ public class ServletController extends HttpServlet {
                                 response.sendError(409);
                             }
                         }
+                    } else {
+                        response.sendError(403, "Forbidden");
                     }
+
                     break;
 
                 case "activate-user":
@@ -460,6 +462,12 @@ public class ServletController extends HttpServlet {
                         System.out.println("Null title parameter");
                         response.sendError(401);
                     }
+                    break;
+
+                case "list-time-slots":
+                    ArrayList<TimeSlot> timeSlots = DAO.queryTimeSlots();
+                    out.println(gson.toJson(timeSlots));
+                    out.flush();
                     break;
             }
         } else {
