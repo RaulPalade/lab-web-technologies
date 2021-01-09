@@ -1,0 +1,31 @@
+-- ADMINISTRATOR --
+case "insert-user":
+case "activate-user":
+case "deactivate-user":
+case "insert-teacher":
+case "activate-teacher":
+case "deactivate-teacher":
+case "insert-course":
+case "activate-course":
+case "deactivate-course":
+case "insert-time-slot":
+case "activate-time-slot":
+case "deactivate-time-slot":
+case "assign-teaching":
+case "activate-teaching":
+case "deactivate-teaching":
+case "list-users":
+case "list-bookings":
+
+-- NON ADMINISTRATOR --
+case "login":
+case "logout":
+case "insert-booking":
+case "delete-booking":
+case "complete-booking":
+case "list-teachers":
+case "list-teacher-availability":
+case "list-courses":
+case "list-teacher-courses":
+case "list-personal-bookings":
+case "list-teacher-by-course":
