@@ -1,4 +1,4 @@
-# frontend_prenota_ripetizioni
+# frontend-lesson-scheduling
 
 ## Project setup
 ```
