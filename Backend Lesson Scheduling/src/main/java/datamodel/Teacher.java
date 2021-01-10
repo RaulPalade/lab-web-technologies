@@ -7,6 +7,7 @@ import java.util.Objects;
  * @project Backend Lesson Scheduling
  */
 public class Teacher {
+    private int id;
     private String name;
     private String surname;
     private String email;
@@ -17,6 +18,13 @@ public class Teacher {
         this.surname = surname;
         this.email = email;
         this.password = password;
+    }
+
+    public Teacher(int id, String name, String surname, String email) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
     }
 
     public Teacher(String email) {
@@ -55,7 +63,8 @@ public class Teacher {
         if (this == o) return true;
         if (!(o instanceof Teacher)) return false;
         Teacher teacher = (Teacher) o;
-        return name.equals(teacher.name) &&
+        return id == teacher.id &&
+                name.equals(teacher.name) &&
                 surname.equals(teacher.surname) &&
                 email.equals(teacher.email) &&
                 password.equals(teacher.password);
@@ -63,12 +72,13 @@ public class Teacher {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, surname, email, password);
+        return Objects.hash(id, name, surname, email, password);
     }
 
     @Override
     public String toString() {
         return "Teacher{" +
+                "id: " + id +
                 "Name: '" + name + '\'' +
                 ", Surname: '" + surname + '\'' +
                 ", Email: '" + email + '\'' +

@@ -7,9 +7,15 @@ import java.util.Objects;
  * @project Backend Lesson Scheduling
  */
 public class Course {
+    private int id;
     private final String title;
 
     public Course(String title) {
+        this.title = title;
+    }
+
+    public Course(int id, String title) {
+        this.id = id;
         this.title = title;
     }
 
@@ -22,19 +28,20 @@ public class Course {
         if (this == o) return true;
         if (!(o instanceof Course)) return false;
         Course course = (Course) o;
-        return title.equals(course.title);
+        return id == course.id &&
+                title.equals(course.title);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title);
+        return Objects.hash(id, title);
     }
 
     @Override
     public String toString() {
         return "Course{" +
+                "id: " + id +
                 "Title: '" + title + '\'' +
                 '}';
     }
-
 }

@@ -39,10 +39,10 @@ public class DAO {
             statement.setBoolean(1, true);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                User user = new User(resultSet.getString("Name"),
+                User user = new User(resultSet.getInt("IdUser"),
+                        resultSet.getString("Name"),
                         resultSet.getString("Surname"),
                         resultSet.getString("Email"),
-                        resultSet.getString("Password"),
                         resultSet.getBoolean("Administrator"));
                 users.add(user);
             }
@@ -139,7 +139,7 @@ public class DAO {
             statement.setString(2, user.getSurname());
             statement.setString(3, user.getEmail());
             statement.setString(4, hashedPassword);
-            statement.setBoolean(5, user.isAmministratore());
+            statement.setBoolean(5, user.isAdministrator());
             rowAffected = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -232,10 +232,10 @@ public class DAO {
             statement.setBoolean(1, true);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Teacher teacher = new Teacher(resultSet.getString("Name"),
+                Teacher teacher = new Teacher(resultSet.getInt("IdTeacher"),
+                        resultSet.getString("Name"),
                         resultSet.getString("Surname"),
-                        resultSet.getString("Email"),
-                        resultSet.getString("Password"));
+                        resultSet.getString("Email"));
                 teachers.add(teacher);
             }
         } catch (SQLException e) {
@@ -259,7 +259,7 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select Day, Hour\n" +
+            PreparedStatement statement = connection.prepareStatement("select IdTimeSlot, Day, Hour\n" +
                     "from time_slot\n" +
                     "where Active = ?\n" +
                     "  and (Day, Hour) not in\n" +
@@ -278,7 +278,7 @@ public class DAO {
             statement.setBoolean(5, false);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                TimeSlot timeSlot = new TimeSlot(resultSet.getString(1), resultSet.getInt(2));
+                TimeSlot timeSlot = new TimeSlot(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3));
                 availableSlots.add(timeSlot);
             }
         } catch (SQLException e) {
@@ -404,7 +404,7 @@ public class DAO {
             statement.setBoolean(1, true);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Course course = new Course(resultSet.getString("Title"));
+                Course course = new Course(resultSet.getInt("IdCourse"), resultSet.getString("Title"));
                 courses.add(course);
             }
         } catch (SQLException e) {
@@ -522,7 +522,7 @@ public class DAO {
             statement.setBoolean(1, true);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                TimeSlot timeSlot = new TimeSlot(resultSet.getString("Day"), resultSet.getInt("Hour"));
+                TimeSlot timeSlot = new TimeSlot(resultSet.getInt("IdTimeSlot"), resultSet.getString("Day"), resultSet.getInt("Hour"));
                 timeSlots.add(timeSlot);
             }
         } catch (SQLException e) {
@@ -640,12 +640,12 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select t.Name, t.Surname, t.Email, c.Title\n" +
+            PreparedStatement statement = connection.prepareStatement("select t.IdTeacher, t.Name, t.Surname, t.Email, c.IdCourse, c.Title\n" +
                     "from teacher_course join teacher t on t.IdTeacher = teacher_course.IdTeacher join course c on c.IdCourse = teacher_course.IdCourse;");
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Teacher teacher = new Teacher(resultSet.getString(1), resultSet.getString(2), resultSet.getString(3));
-                Course course = new Course(resultSet.getString(4));
+                Teacher teacher = new Teacher(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getString(4));
+                Course course = new Course(resultSet.getInt(5), resultSet.getString(6));
                 TeacherCourse teacherCourse = new TeacherCourse(teacher, course);
                 teacherCourses.add(teacherCourse);
             }
