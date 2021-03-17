@@ -1,8 +1,5 @@
 package filter;
 
-import datamodel.DAO;
-import datamodel.User;
-
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
@@ -19,57 +16,30 @@ import java.io.IOException;
 public class UserSessionFilter implements Filter {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
-        System.out.println("GENERAL FILTER");
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
-        ((HttpServletResponse) response).addHeader("Access-Control-Allow-Origin", "*");
-        ((HttpServletResponse) response).addHeader("Access-Control-Allow-Methods", "GET, OPTIONS, HEAD, PUT, POST");
-        ((HttpServletResponse) response).addHeader("Access-Control-Allow-Headers", "Content-Type");
-        ((HttpServletResponse) response).addHeader("Access-Control-Max-Age", "86400");
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) res;
 
-        HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse res = (HttpServletResponse) response;
+        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+        response.setHeader("Access-Control-Max-Age", "3600");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me");
+
         String action = request.getParameter("action");
-
-        HttpSession session = req.getSession(false);
+        HttpSession session = request.getSession(false);
 
         if (action != null) {
             System.out.println(action);
-            if (session == null && (!action.equals("login") && !action.equals("logout")
-                    && !action.equals("list-teachers")
-                    && !action.equals("list-courses")
-                    && !action.equals("list-teacher-courses"))) {
-                res.sendError(401, "Unauthorized access request");
-            }
-
-            if (session != null && (action.equals("insert-user") ||
-                    action.equals("activate-user") ||
-                    action.equals("deactivate-user") ||
-                    action.equals("insert-teacher") ||
-                    action.equals("activate-teacher") ||
-                    action.equals("deactivate-teacher") ||
-                    action.equals("insert-course") ||
-                    action.equals("activate-course") ||
-                    action.equals("deactivate-course") ||
-                    action.equals("insert-time-slot") ||
-                    action.equals("activate-time-slot") ||
-                    action.equals("deactivate-time-slot") ||
-                    action.equals("assign-teaching") ||
-                    action.equals("activate-teaching") ||
-                    action.equals("deactivate-teaching") ||
-                    action.equals("list-users") ||
-                    action.equals("list-bookings") ||
-                    action.equals("list-time-slots")) &&
-                    !DAO.isAdmin(new User(req.getSession().getAttribute("emailUser").toString()))) {
-                res.sendError(403, "Forbidden");
-                System.out.println(DAO.isAdmin(new User(req.getSession().getAttribute("emailUser").toString())));
-                System.out.println("ERRORE ADMIN");
+            if (session == null && !action.equals("login") && !action.equals("logout")) {
+                response.sendError(401, "Unauthorized");
             } else {
                 chain.doFilter(request, response);
             }
         } else {
             System.out.println("NULL ACTION");
-            res.sendError(400, "Bad Request");
+            response.sendError(400, "Bad Request");
         }
     }
 }

@@ -7,9 +7,6 @@
         </router-link>
       </b-col>
     </b-row>
-    <div>
-      {{ courses }}
-    </div>
   </b-container>
 </template>
 
@@ -25,32 +22,6 @@ export default {
   data() {
     return {
       courses: [],
-      // courses: [
-      //   {
-      //     id: 1,
-      //     name: "Algoritmi e Strutture Dati",
-      //   },
-      //   {
-      //     id: 2,
-      //     name: "Tecnologie Web",
-      //   },
-      //   {
-      //     id: 3,
-      //     name: "Economia",
-      //   },
-      //   {
-      //     id: 4,
-      //     name: "Sistemi Operativi",
-      //   },
-      //   {
-      //     id: 5,
-      //     name: "Analisi Matematica",
-      //   },
-      //   {
-      //     id: 6,
-      //     name: "Linguaggi Formali e Traduttori",
-      //   },
-      // ],
     };
   },
   mounted() {
