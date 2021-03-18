@@ -94,6 +94,10 @@ public class DAO {
     }
 
     public static boolean isAdmin(User user) {
+        if (user == null) {
+            return false;
+        }
+
         Connection connection = null;
         int rowAffected = 0;
 

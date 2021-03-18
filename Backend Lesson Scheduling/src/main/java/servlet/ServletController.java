@@ -1,6 +1,9 @@
 package servlet;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import datamodel.*;
 
 import javax.servlet.ServletException;
@@ -24,6 +27,20 @@ public class ServletController extends HttpServlet {
         DAO.registerDriver();
     }
 
+    private boolean isLogged(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        return session != null;
+    }
+
+    private boolean isLoggedAndAdmin(HttpServletRequest request) {
+        if (isLogged(request)) {
+            String currentUser = request.getSession().getAttribute("emailUser").toString();
+            return DAO.isAdmin(new User(currentUser));
+        } else {
+            return false;
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
@@ -45,26 +62,16 @@ public class ServletController extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        boolean isAdmin = false;
-        if (!action.equals("login") && !action.equals("logout")) {
-            String currentUser = request.getSession().getAttribute("emailUser").toString();
-            isAdmin = DAO.isAdmin(new User(currentUser));
-        }
-
-        System.out.println("isAdmin POST: " + isAdmin);
-
         switch (action) {
             case "login":
                 StringBuilder buffer = new StringBuilder();
                 BufferedReader reader = request.getReader();
-                System.out.println(reader);
                 String line;
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line);
                     buffer.append(System.lineSeparator());
                 }
                 String jsonString = buffer.toString();
-                //System.out.println(jsonString);
 
                 JsonObject jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();
 
@@ -117,7 +124,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "insert-user":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     userName = request.getParameter("name");
                     userSurname = request.getParameter("surname");
                     userEmail = request.getParameter("email");
@@ -143,7 +150,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "activate-user":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     userName = request.getParameter("name");
                     userSurname = request.getParameter("surname");
                     userEmail = request.getParameter("email");
@@ -163,7 +170,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "deactivate-user":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     userName = request.getParameter("name");
                     userSurname = request.getParameter("surname");
                     userEmail = request.getParameter("email");
@@ -183,7 +190,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "insert-teacher":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     teacherName = request.getParameter("name");
                     teacherSurname = request.getParameter("surname");
                     teacherEmail = request.getParameter("email");
@@ -206,7 +213,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "activate-teacher":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     teacherName = request.getParameter("name");
                     teacherSurname = request.getParameter("surname");
                     teacherEmail = request.getParameter("email");
@@ -226,7 +233,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "deactivate-teacher":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     teacherName = request.getParameter("name");
                     teacherSurname = request.getParameter("surname");
                     teacherEmail = request.getParameter("email");
@@ -246,7 +253,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "insert-course":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     title = request.getParameter("title");
 
                     if (title != null && !title.isBlank()) {
@@ -266,7 +273,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "activate-course":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     title = request.getParameter("title");
 
                     if (title != null && !title.isBlank()) {
@@ -284,7 +291,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "deactivate-course":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     title = request.getParameter("title");
 
                     if (title != null && !title.isBlank()) {
@@ -302,7 +309,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "insert-time-slot":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     day = request.getParameter("day");
                     hour = Integer.parseInt(request.getParameter("hour"));
 
@@ -323,7 +330,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "activate-time-slot":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     day = request.getParameter("day");
                     hour = Integer.parseInt(request.getParameter("hour"));
 
@@ -342,7 +349,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "deactivate-time-slot":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     day = request.getParameter("day");
                     hour = Integer.parseInt(request.getParameter("hour"));
 
@@ -361,7 +368,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "assign-teaching":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     teacherEmail = request.getParameter("teacher-email");
                     title = request.getParameter("title");
 
@@ -382,7 +389,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "activate-teaching":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     teacherEmail = request.getParameter("teacher-email");
                     title = request.getParameter("title");
 
@@ -401,7 +408,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "deactivate-teaching":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     teacherEmail = request.getParameter("teacher-email");
                     title = request.getParameter("title");
 
@@ -420,55 +427,65 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "insert-booking":
-                userEmail = request.getParameter("user-email");
-                day = request.getParameter("day");
-                hour = Integer.parseInt(request.getParameter("hour"));
-                teacherEmail = request.getParameter("teacher-email");
-                title = request.getParameter("title");
+                if (isLogged(request)) {
+                    userEmail = request.getParameter("user-email");
+                    day = request.getParameter("day");
+                    hour = Integer.parseInt(request.getParameter("hour"));
+                    teacherEmail = request.getParameter("teacher-email");
+                    title = request.getParameter("title");
 
-                if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                    if (DAO.insertBooking(new User(userEmail), new TimeSlot(day, hour), new Teacher(teacherEmail), new Course(title))) {
-                        System.out.println("Booking registered");
-                        response.setStatus(201);
-                    } else {
-                        System.out.println("Error during booking insertion");
-                        response.sendError(400);
+                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
+                        if (DAO.insertBooking(new User(userEmail), new TimeSlot(day, hour), new Teacher(teacherEmail), new Course(title))) {
+                            System.out.println("Booking registered");
+                            response.setStatus(201);
+                        } else {
+                            System.out.println("Error during booking insertion");
+                            response.sendError(400);
+                        }
                     }
+                } else {
+                    response.sendError(401);
                 }
                 break;
 
             case "delete-booking":
-                userEmail = request.getParameter("user-email");
-                day = request.getParameter("day");
-                hour = Integer.parseInt(request.getParameter("hour"));
-                teacherEmail = request.getParameter("teacher-email");
-                title = request.getParameter("title");
+                if (isLogged(request)) {
+                    userEmail = request.getParameter("user-email");
+                    day = request.getParameter("day");
+                    hour = Integer.parseInt(request.getParameter("hour"));
+                    teacherEmail = request.getParameter("teacher-email");
+                    title = request.getParameter("title");
 
-                if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                    if (DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
-                        System.out.println("Booking deleted");
-                        response.setStatus(201);
-                    } else {
-                        System.out.println("Error during booking deletion");
-                        response.sendError(400);
+                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
+                        if (DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
+                            System.out.println("Booking deleted");
+                            response.setStatus(201);
+                        } else {
+                            System.out.println("Error during booking deletion");
+                            response.sendError(400);
+                        }
                     }
+                } else {
+                    response.sendError(401);
                 }
                 break;
 
             case "complete-booking":
-                userEmail = request.getParameter("user-email");
-                day = request.getParameter("day");
-                hour = Integer.parseInt(request.getParameter("hour"));
-                teacherEmail = request.getParameter("teacher-email");
-                title = request.getParameter("title");
+                if (isLogged(request)) {
+                    userEmail = request.getParameter("user-email");
+                    day = request.getParameter("day");
+                    hour = Integer.parseInt(request.getParameter("hour"));
+                    teacherEmail = request.getParameter("teacher-email");
+                    title = request.getParameter("title");
 
-                if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                    if (DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
-                        System.out.println("Booking completed");
-                        response.setStatus(201);
-                    } else {
-                        System.out.println("Error while completing the booking");
-                        response.sendError(400);
+                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
+                        if (DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
+                            System.out.println("Booking completed");
+                            response.setStatus(201);
+                        } else {
+                            System.out.println("Error while completing the booking");
+                            response.sendError(400);
+                        }
                     }
                 }
                 break;
@@ -487,13 +504,9 @@ public class ServletController extends HttpServlet {
         PrintWriter out = response.getWriter();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        String currentUser = request.getSession().getAttribute("emailUser").toString();
-        boolean isAdmin = DAO.isAdmin(new User(currentUser));
-        System.out.println("isAdmin GET: " + isAdmin);
-
         switch (action) {
             case "list-users":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     ArrayList<User> users = DAO.queryUsers();
                     out.println(gson.toJson(users));
                     out.flush();
@@ -530,7 +543,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "list-bookings":
-                if (isAdmin) {
+                if (isLoggedAndAdmin(request)) {
                     ArrayList<Booking> bookings = DAO.queryBookings();
                     out.println(gson.toJson(bookings));
                     out.flush();
@@ -540,9 +553,9 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "list-personal-bookings":
-                currentUser = request.getSession().getAttribute("emailUser").toString();
-                if (currentUser != null) {
-                    ArrayList<Booking> personalBookings = DAO.queryPersonalBooking(new User(currentUser));
+                if (isLoggedAndAdmin(request)) {
+                    String thisUser = request.getSession().getAttribute("emailUser").toString();
+                    ArrayList<Booking> personalBookings = DAO.queryPersonalBooking(new User(thisUser));
                     out.println(gson.toJson(personalBookings));
                     out.flush();
                 } else {
@@ -564,7 +577,7 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "list-time-slots":
-                if (isAdmin) {
+                if (isLogged(request)) {
                     ArrayList<TimeSlot> timeSlots = DAO.queryTimeSlots();
                     out.println(gson.toJson(timeSlots));
                     out.flush();

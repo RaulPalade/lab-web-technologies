@@ -29,11 +29,7 @@ export default {
       .get("http://localhost:8080/ServletController?action=list-courses")
       .then((response) => (this.courses = response.data))
       .catch(function (error) {
-        if (error.response) {
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        }
+        console.log(error);
       });
   },
 };
