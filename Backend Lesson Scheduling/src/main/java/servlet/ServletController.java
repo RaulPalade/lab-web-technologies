@@ -2,14 +2,11 @@ package servlet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import datamodel.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -64,7 +61,7 @@ public class ServletController extends HttpServlet {
 
         switch (action) {
             case "login":
-                StringBuilder buffer = new StringBuilder();
+/*                StringBuilder buffer = new StringBuilder();
                 BufferedReader reader = request.getReader();
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -78,10 +75,10 @@ public class ServletController extends HttpServlet {
                 userEmail = jsonObject.get("email").getAsString();
                 System.out.println(userEmail);
                 password = jsonObject.get("password").getAsString();
-                System.out.println(password);
+                System.out.println(password);*/
 
-                /*userEmail = request.getParameter("email");
-                password = request.getParameter("password");*/
+                userEmail = request.getParameter("email");
+                password = request.getParameter("password");
 
                 System.out.println("------");
                 System.out.println(userEmail);
@@ -101,7 +98,7 @@ public class ServletController extends HttpServlet {
                     System.out.println("Login Success with jSessionID: " + jSessionId);
                 } else {
                     System.out.println("Wrong Email or Password");
-                    response.sendError(response.getStatus(), "Wrong Email or Password");
+                    response.sendError(401, "Wrong Email or Password");
                 }
                 break;
 
@@ -142,7 +139,7 @@ public class ServletController extends HttpServlet {
                             }
                         }
                     } else {
-                        response.sendError(403, "Forbidden");
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -156,13 +153,11 @@ public class ServletController extends HttpServlet {
                     userEmail = request.getParameter("email");
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
-                        if (DAO.activateUser(new User(userName, userSurname, userEmail))) {
-                            System.out.println("User activated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during user activation");
-                            response.sendError(400);
-                        }
+                        DAO.activateUser(new User(userName, userSurname, userEmail));
+                        System.out.println("User activated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -176,13 +171,11 @@ public class ServletController extends HttpServlet {
                     userEmail = request.getParameter("email");
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
-                        if (DAO.deactivateUser(new User(userName, userSurname, userEmail))) {
-                            System.out.println("User deactivated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during user deactivation");
-                            response.sendError(400);
-                        }
+                        DAO.deactivateUser(new User(userName, userSurname, userEmail));
+                        System.out.println("User deactivated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -206,6 +199,8 @@ public class ServletController extends HttpServlet {
                                 response.sendError(409);
                             }
                         }
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -219,13 +214,11 @@ public class ServletController extends HttpServlet {
                     teacherEmail = request.getParameter("email");
 
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
-                        if (DAO.activateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail))) {
-                            System.out.println("Teacher activated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during teacher activation");
-                            response.sendError(400);
-                        }
+                        DAO.activateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail));
+                        System.out.println("Teacher activated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -239,13 +232,11 @@ public class ServletController extends HttpServlet {
                     teacherEmail = request.getParameter("email");
 
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
-                        if (DAO.deactivateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail))) {
-                            System.out.println("Teacher deactivated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during teacher deactivation");
-                            response.sendError(400);
-                        }
+                        DAO.deactivateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail));
+                        System.out.println("Teacher deactivated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -277,13 +268,11 @@ public class ServletController extends HttpServlet {
                     title = request.getParameter("title");
 
                     if (title != null && !title.isBlank()) {
-                        if (DAO.activateCourse(new Course(title))) {
-                            System.out.println("Course activated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during course activation");
-                            response.sendError(400);
-                        }
+                        DAO.activateCourse(new Course(title));
+                        System.out.println("Course activated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -295,13 +284,11 @@ public class ServletController extends HttpServlet {
                     title = request.getParameter("title");
 
                     if (title != null && !title.isBlank()) {
-                        if (DAO.deactivateCourse(new Course(title))) {
-                            System.out.println("Course deactivated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during course deactivation");
-                            response.sendError(400);
-                        }
+                        DAO.deactivateCourse(new Course(title));
+                        System.out.println("Course deactivated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -335,13 +322,11 @@ public class ServletController extends HttpServlet {
                     hour = Integer.parseInt(request.getParameter("hour"));
 
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
-                        if (DAO.activateTimeSlot(new TimeSlot(day, hour))) {
-                            System.out.println("TimeSlot activated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during time slot activation");
-                            response.sendError(400);
-                        }
+                        DAO.activateTimeSlot(new TimeSlot(day, hour));
+                        System.out.println("TimeSlot activated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -354,13 +339,11 @@ public class ServletController extends HttpServlet {
                     hour = Integer.parseInt(request.getParameter("hour"));
 
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
-                        if (DAO.deactivateTimeSlot(new TimeSlot(day, hour))) {
-                            System.out.println("TimeSlot deactivated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during time slot deactivation");
-                            response.sendError(400);
-                        }
+                        DAO.deactivateTimeSlot(new TimeSlot(day, hour));
+                        System.out.println("TimeSlot deactivated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -394,13 +377,11 @@ public class ServletController extends HttpServlet {
                     title = request.getParameter("title");
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                        if (DAO.activateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
-                            System.out.println("Teaching activated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during teaching activation");
-                            response.sendError(400);
-                        }
+                        DAO.activateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)));
+                        System.out.println("Teaching activated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -413,13 +394,11 @@ public class ServletController extends HttpServlet {
                     title = request.getParameter("title");
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                        if (DAO.deactivateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
-                            System.out.println("Teaching deactivated");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during teaching deactivation");
-                            response.sendError(400);
-                        }
+                        DAO.deactivateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)));
+                        System.out.println("Teaching deactivated");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -442,6 +421,8 @@ public class ServletController extends HttpServlet {
                             System.out.println("Error during booking insertion");
                             response.sendError(400);
                         }
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -457,13 +438,11 @@ public class ServletController extends HttpServlet {
                     title = request.getParameter("title");
 
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                        if (DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
-                            System.out.println("Booking deleted");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error during booking deletion");
-                            response.sendError(400);
-                        }
+                        DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))));
+                        System.out.println("Booking deleted");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 } else {
                     response.sendError(401);
@@ -479,13 +458,11 @@ public class ServletController extends HttpServlet {
                     title = request.getParameter("title");
 
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                        if (DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
-                            System.out.println("Booking completed");
-                            response.setStatus(201);
-                        } else {
-                            System.out.println("Error while completing the booking");
-                            response.sendError(400);
-                        }
+                        DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))));
+                        System.out.println("Booking completed");
+                        response.setStatus(201);
+                    } else {
+                        response.sendError(400, "Bad Request");
                     }
                 }
                 break;
@@ -493,11 +470,12 @@ public class ServletController extends HttpServlet {
             default:
                 response.sendError(400, "Bad Request");
         }
+
     }
 
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
         String action = request.getParameter("action");
