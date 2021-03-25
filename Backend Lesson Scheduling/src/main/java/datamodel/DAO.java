@@ -806,13 +806,16 @@ public class DAO {
         return teachers;
     }
 
-    public static ArrayList<Booking> queryBookings() {
+    public static ArrayList<Booking> queryAllBookings() {
         Connection connection = null;
         ArrayList<Booking> bookings = new ArrayList<>();
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select u.Name, u.Surname, u.Email, ts.Day, ts.Hour, t.Name, t.Surname, t.Email, c.Title, Deleted, Completed\n" +
+            PreparedStatement statement = connection.prepareStatement("select u.idUser, u.Name, u.Surname, u.Email, " +
+                    "ts.idTimeSlot, ts.Day, ts.Hour, " +
+                    "t.idTeacher, t.Name, t.Surname, t.Email, " +
+                    "c.idCourse, c.Title, Deleted, Completed\n" +
                     "from booking\n" +
                     "         join user u on u.IdUser = booking.IdUser\n" +
                     "         join time_slot ts on ts.IdTimeSlot = booking.IdTimeSlot\n" +
@@ -821,13 +824,13 @@ public class DAO {
                     "         join course c on c.IdCourse = tc.IdCourse;");
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                User user = new User(resultSet.getString(1), resultSet.getString(2), resultSet.getString(3));
-                TimeSlot timeSlot = new TimeSlot(resultSet.getString(4), resultSet.getInt(5));
-                Teacher teacher = new Teacher(resultSet.getString(6), resultSet.getString(7), resultSet.getString(8));
-                Course course = new Course(resultSet.getString(9));
+                User user = new User(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getString(4));
+                TimeSlot timeSlot = new TimeSlot(resultSet.getInt(5), resultSet.getString(6), resultSet.getInt(7));
+                Teacher teacher = new Teacher(resultSet.getInt(8), resultSet.getString(9), resultSet.getString(10), resultSet.getString(11));
+                Course course = new Course(resultSet.getInt(12), resultSet.getString(13));
                 TeacherCourse teacherCourse = new TeacherCourse(teacher, course);
 
-                Booking booking = new Booking(user, timeSlot, teacherCourse, resultSet.getBoolean(10), resultSet.getBoolean(11));
+                Booking booking = new Booking(user, timeSlot, teacherCourse, resultSet.getBoolean(14), resultSet.getBoolean(15));
                 bookings.add(booking);
             }
         } catch (SQLException e) {
@@ -845,13 +848,52 @@ public class DAO {
         return bookings;
     }
 
-    public static ArrayList<Booking> queryPersonalBooking(User user) {
+    public static ArrayList<Booking> queryAllActiveBookings() {
+        ArrayList<Booking> activeBookings = new ArrayList<>();
+        ArrayList<Booking> bookings = DAO.queryAllBookings();
+        for (Booking b : bookings) {
+            if (!b.isCompleted() && !b.isDeleted()) {
+                activeBookings.add(b);
+            }
+        }
+        return activeBookings;
+    }
+
+    public static ArrayList<Booking> queryAllCompletedBookings() {
+        ArrayList<Booking> completedBookings = new ArrayList<>();
+        ArrayList<Booking> bookings = DAO.queryAllBookings();
+        for (Booking b : bookings) {
+            if (b.isCompleted()) {
+                completedBookings.add(b);
+            }
+        }
+        return completedBookings;
+    }
+
+    public static ArrayList<Booking> queryAllDeletedBookings() {
+        ArrayList<Booking> deletedBookings = new ArrayList<>();
+        ArrayList<Booking> bookings = DAO.queryAllBookings();
+        for (Booking b : bookings) {
+            if (b.isDeleted()) {
+                deletedBookings.add(b);
+            }
+        }
+        return deletedBookings;
+    }
+
+    public static ArrayList<Booking> queryPersonalBookings(User user) {
+        if (user == null) {
+            return new ArrayList<>();
+        }
+
         Connection connection = null;
         ArrayList<Booking> personalBookings = new ArrayList<>();
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select ts.Day, ts.Hour, t.Name, t.Surname, t.Email, c.Title, Deleted, Completed\n" +
+            PreparedStatement statement = connection.prepareStatement("select ts.IdTimeSlot, ts.Day, ts.Hour, " +
+                    "t.idTeacher, t.Name, t.Surname, t.Email, " +
+                    "c.idCourse, c.Title, Deleted, Completed\n" +
                     "from booking\n" +
                     "         join user u on u.IdUser = booking.IdUser\n" +
                     "         join time_slot ts on ts.IdTimeSlot = booking.IdTimeSlot\n" +
@@ -862,12 +904,12 @@ public class DAO {
             statement.setString(1, user.getEmail());
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                TimeSlot timeSlot = new TimeSlot(resultSet.getString(1), resultSet.getInt(2));
-                Teacher teacher = new Teacher(resultSet.getString(3), resultSet.getString(4), resultSet.getString(5));
-                Course course = new Course(resultSet.getString(6));
+                TimeSlot timeSlot = new TimeSlot(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3));
+                Teacher teacher = new Teacher(resultSet.getInt(4), resultSet.getString(5), resultSet.getString(6), resultSet.getString(7));
+                Course course = new Course(resultSet.getInt(8), resultSet.getString(9));
                 TeacherCourse teacherCourse = new TeacherCourse(teacher, course);
 
-                Booking booking = new Booking(timeSlot, teacherCourse, resultSet.getBoolean(7), resultSet.getBoolean(8));
+                Booking booking = new Booking(timeSlot, teacherCourse, resultSet.getBoolean(10), resultSet.getBoolean(11));
                 personalBookings.add(booking);
             }
         } catch (SQLException e) {
@@ -883,6 +925,52 @@ public class DAO {
         }
 
         return personalBookings;
+    }
+
+    public static ArrayList<Booking> queryPersonalActiveBookings(User user) {
+        if (user == null) {
+            return new ArrayList<>();
+        }
+        ArrayList<Booking> personalActiveBookings = new ArrayList<>();
+        ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
+        for (Booking b : bookings) {
+            if (!b.isCompleted() && !b.isDeleted()) {
+                personalActiveBookings.add(b);
+            }
+        }
+
+        return personalActiveBookings;
+    }
+
+    public static ArrayList<Booking> queryPersonalCompletedBookings(User user) {
+        if (user == null) {
+            return new ArrayList<>();
+        }
+
+        ArrayList<Booking> personalCompletedBookings = new ArrayList<>();
+        ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
+        for (Booking b : bookings) {
+            if (b.isCompleted()) {
+                personalCompletedBookings.add(b);
+            }
+        }
+
+        return personalCompletedBookings;
+    }
+
+    public static ArrayList<Booking> queryPersonalDeletedBookings(User user) {
+        if (user == null) {
+            return new ArrayList<>();
+        }
+        ArrayList<Booking> personalDeletedBookings = new ArrayList<>();
+        ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
+        for (Booking b : bookings) {
+            if (b.isDeleted()) {
+                personalDeletedBookings.add(b);
+            }
+        }
+
+        return personalDeletedBookings;
     }
 
     public static boolean insertBooking(User user, TimeSlot timeSlot, Teacher teacher, Course course) {

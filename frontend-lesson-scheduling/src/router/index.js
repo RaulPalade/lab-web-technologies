@@ -36,6 +36,12 @@ const router = new VueRouter({
   routes,
 });
 
+/**
+ * Ferma gli utenti non autenticati che cercano di accedere 
+ * a routes che richiedono il meta {requiresAuth: true}
+ * Se l'utente è già autenticato può proseguire liberamente
+ * Se l'utente non è autenticato viene rimandato a /login
+ */
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (store.getters.isAuthenticated) {
@@ -48,6 +54,12 @@ router.beforeEach((to, from, next) => {
   }
 });
 
+/**
+ * Ferma gli utenti autenticati che cercano di accedere a routes 
+ * che richiedono il meta {guest: true}
+ * Se l'utente è già autenticato non può accedere a meta {guest: true}
+ * Se l'utente non è autenticato può accedere a meta {guest: true}
+ */
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.guest)) {
     if (store.getters.isAuthenticated) {

@@ -8,8 +8,8 @@ import java.util.Objects;
  */
 public class Booking {
     private User user;
-    private TimeSlot timeSlot;
-    private TeacherCourse teacherCourse;
+    private final TimeSlot timeSlot;
+    private final TeacherCourse teacherCourse;
     private boolean deleted;
     private boolean completed;
 
@@ -38,40 +38,20 @@ public class Booking {
         return user;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public TimeSlot getTimeSlot() {
         return timeSlot;
-    }
-
-    public void setTimeSlot(TimeSlot timeSlot) {
-        this.timeSlot = timeSlot;
     }
 
     public TeacherCourse getTeacherCourse() {
         return teacherCourse;
     }
 
-    public void setTeacherCourse(TeacherCourse teacherCourse) {
-        this.teacherCourse = teacherCourse;
-    }
-
     public boolean isDeleted() {
         return deleted;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
     public boolean isCompleted() {
         return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
     }
 
     @Override

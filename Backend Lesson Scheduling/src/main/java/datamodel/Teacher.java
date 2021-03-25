@@ -13,13 +13,6 @@ public class Teacher {
     private String email;
     private String password;
 
-    public Teacher(String name, String surname, String email, String password) {
-        this.name = name;
-        this.surname = surname;
-        this.email = email;
-        this.password = password;
-    }
-
     public Teacher(int id, String name, String surname, String email) {
         this.id = id;
         this.name = name;
@@ -27,7 +20,16 @@ public class Teacher {
         this.email = email;
     }
 
-    public Teacher(String email) {
+    public Teacher(String name, String surname, String email, String password) {
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.password = password;
+    }
+
+    public Teacher(String name, String surname, String email) {
+        this.name = name;
+        this.surname = surname;
         this.email = email;
     }
 
@@ -36,9 +38,7 @@ public class Teacher {
         this.surname = surname;
     }
 
-    public Teacher(String name, String surname, String email) {
-        this.name = name;
-        this.surname = surname;
+    public Teacher(String email) {
         this.email = email;
     }
 
@@ -85,5 +85,4 @@ public class Teacher {
                 ", Password: '" + password + '\'' +
                 '}';
     }
-
 }

@@ -10,12 +10,12 @@ public class Course {
     private int id;
     private final String title;
 
-    public Course(String title) {
+    public Course(int id, String title) {
+        this.id = id;
         this.title = title;
     }
 
-    public Course(int id, String title) {
-        this.id = id;
+    public Course(String title) {
         this.title = title;
     }
 

@@ -14,14 +14,6 @@ public class User {
     private String password;
     private boolean administrator;
 
-    public User(String name, String surname, String email, String password, boolean administrator) {
-        this.name = name;
-        this.surname = surname;
-        this.email = email;
-        this.password = password;
-        this.administrator = administrator;
-    }
-
     public User(int id, String name, String surname, String email, boolean administrator) {
         this.id = id;
         this.name = name;
@@ -30,7 +22,18 @@ public class User {
         this.administrator = administrator;
     }
 
-    public User(String email) {
+    public User(String name, String surname, String email, String password, boolean administrator) {
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.password = password;
+        this.administrator = administrator;
+    }
+
+    public User(int id, String name, String surname, String email) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
         this.email = email;
     }
 
@@ -43,6 +46,10 @@ public class User {
     public User(String email, String password) {
         this.email = email;
         this.password = password;
+    }
+
+    public User(String email) {
+        this.email = email;
     }
 
     public String getName() {
@@ -85,7 +92,6 @@ public class User {
 
     @Override
     public String toString() {
-
         String tipo;
         if (!this.administrator) {
             tipo = "User";
@@ -102,5 +108,4 @@ public class User {
                 ", User: " + tipo +
                 '}';
     }
-
 }

@@ -7,8 +7,8 @@ import java.util.Objects;
  * @project Backend Lesson Scheduling
  */
 public class TeacherCourse {
-    private Teacher teacher;
-    private Course course;
+    private final Teacher teacher;
+    private final Course course;
 
     public TeacherCourse(Teacher teacher, Course course) {
         this.teacher = teacher;
@@ -19,16 +19,8 @@ public class TeacherCourse {
         return teacher;
     }
 
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
-    }
-
     public Course getCourse() {
         return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
     }
 
     @Override
@@ -52,5 +44,4 @@ public class TeacherCourse {
                 ", Course: " + course.getTitle() +
                 '}';
     }
-
 }

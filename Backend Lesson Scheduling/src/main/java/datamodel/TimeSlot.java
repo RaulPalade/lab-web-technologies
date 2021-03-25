@@ -8,16 +8,16 @@ import java.util.Objects;
  */
 public class TimeSlot {
     private int id;
-    private String day;
-    private int hour;
+    private final String day;
+    private final int hour;
 
-    public TimeSlot(String day, int hour) {
+    public TimeSlot(int id, String day, int hour) {
+        this.id = id;
         this.day = day;
         this.hour = hour;
     }
 
-    public TimeSlot(int id, String day, int hour) {
-        this.id = id;
+    public TimeSlot(String day, int hour) {
         this.day = day;
         this.hour = hour;
     }
@@ -26,16 +26,8 @@ public class TimeSlot {
         return day;
     }
 
-    public void setDay(String day) {
-        this.day = day;
-    }
-
     public int getHour() {
         return hour;
-    }
-
-    public void setHour(int hour) {
-        this.hour = hour;
     }
 
     @Override
@@ -61,5 +53,4 @@ public class TimeSlot {
                 ", Hour: " + hour +
                 '}';
     }
-
 }

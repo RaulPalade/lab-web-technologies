@@ -6,6 +6,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * @author Raul Palade
+ * @project Backend Lesson Scheduling
+ */
 @WebFilter(filterName = "CorsFilter", urlPatterns = "/*")
 public class CorsFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
