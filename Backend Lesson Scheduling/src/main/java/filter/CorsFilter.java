@@ -27,7 +27,7 @@ public class CorsFilter implements Filter {
         if (action != null) {
             chain.doFilter(request, response);
         } else {
-            response.sendError(400, "Bad Request");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 }

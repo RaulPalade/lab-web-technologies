@@ -41,6 +41,18 @@ public class ServletController extends HttpServlet {
         }
     }
 
+    private String readJSONRequest(HttpServletRequest request) throws IOException {
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = request.getReader();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            buffer.append(line);
+            buffer.append(System.lineSeparator());
+        }
+
+        return buffer.toString();
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
@@ -64,16 +76,8 @@ public class ServletController extends HttpServlet {
 
         switch (action) {
             case "login":
-                StringBuilder buffer = new StringBuilder();
-                BufferedReader reader = request.getReader();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                    buffer.append(System.lineSeparator());
-                }
-                String jsonString = buffer.toString();
-
-                JsonObject jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();
+                String jsonString = readJSONRequest(request);
+                JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
 
                 userEmail = jsonObject.get("email").getAsString();
                 System.out.println(userEmail);
@@ -101,7 +105,7 @@ public class ServletController extends HttpServlet {
                     System.out.println("Login Success with jSessionID: " + jSessionId);
                 } else {
                     System.out.println("Wrong Email or Password");
-                    response.sendError(401, "Wrong Email or Password");
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -119,7 +123,7 @@ public class ServletController extends HttpServlet {
                 HttpSession session = request.getSession(false);
                 if (session != null) {
                     session.invalidate();
-                    response.setStatus(200);
+                    response.setStatus(HttpServletResponse.SC_OK);
                 }
                 break;
 
@@ -133,19 +137,17 @@ public class ServletController extends HttpServlet {
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
                         if (DAO.insertUser(new User(userName, userSurname, userEmail, password, administrator))) {
-                            System.out.println("User registered");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfUserExists(new User(userName, userSurname, userEmail, password, administrator))) {
-                                System.out.println("User already exists");
-                                response.sendError(409);
+                                response.sendError(HttpServletResponse.SC_CONFLICT);
                             }
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -157,16 +159,15 @@ public class ServletController extends HttpServlet {
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
                         if (DAO.activateUser(new User(userName, userSurname, userEmail))) {
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            System.out.println("User activated");
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -178,16 +179,15 @@ public class ServletController extends HttpServlet {
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
                         if (DAO.deactivateUser(new User(userName, userSurname, userEmail))) {
-                            System.out.println("User deactivated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -201,18 +201,18 @@ public class ServletController extends HttpServlet {
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
                         if (DAO.insertTeacher(new Teacher(teacherName, teacherSurname, teacherEmail, password))) {
                             System.out.println("Teacher registered");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfTeacherExists(new Teacher(teacherName, teacherSurname, teacherEmail, password))) {
                                 System.out.println("Teacher already exists");
-                                response.sendError(409);
+                                response.sendError(HttpServletResponse.SC_CONFLICT);
                             }
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -225,15 +225,15 @@ public class ServletController extends HttpServlet {
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
                         if (DAO.activateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail))) {
                             System.out.println("Teacher activated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -246,15 +246,15 @@ public class ServletController extends HttpServlet {
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
                         if (DAO.deactivateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail))) {
                             System.out.println("Teacher deactivated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -265,16 +265,16 @@ public class ServletController extends HttpServlet {
                     if (title != null && !title.isBlank()) {
                         if (DAO.insertCourse(new Course(title))) {
                             System.out.println("Course registered");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfCourseExists(new Course(title))) {
                                 System.out.println("Course already exists");
-                                response.sendError(409);
+                                response.sendError(HttpServletResponse.SC_CONFLICT);
                             }
                         }
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -285,15 +285,15 @@ public class ServletController extends HttpServlet {
                     if (title != null && !title.isBlank()) {
                         if (DAO.activateCourse(new Course(title))) {
                             System.out.println("Course activated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -304,15 +304,15 @@ public class ServletController extends HttpServlet {
                     if (title != null && !title.isBlank()) {
                         if (DAO.deactivateCourse(new Course(title))) {
                             System.out.println("Course deactivated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -324,16 +324,16 @@ public class ServletController extends HttpServlet {
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.insertTimeSlot(new TimeSlot(day, hour))) {
                             System.out.println("TimeSlot registered");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfTimeSlotExists(new TimeSlot(day, hour))) {
                                 System.out.println("TimeSlot already exists");
-                                response.sendError(409);
+                                response.sendError(HttpServletResponse.SC_CONFLICT);
                             }
                         }
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -345,15 +345,15 @@ public class ServletController extends HttpServlet {
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.activateTimeSlot(new TimeSlot(day, hour))) {
                             System.out.println("TimeSlot activated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -365,15 +365,15 @@ public class ServletController extends HttpServlet {
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.deactivateTimeSlot(new TimeSlot(day, hour))) {
                             System.out.println("TimeSlot deactivated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -385,16 +385,16 @@ public class ServletController extends HttpServlet {
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.assignTeaching(new Teacher(teacherEmail), new Course(title))) {
                             System.out.println("Teacher assignment registered");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfTeachingExists(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
-                                response.sendError(409);
+                                response.sendError(HttpServletResponse.SC_CONFLICT);
                                 System.out.println("Teacher assignment already exists");
                             }
                         }
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -406,15 +406,15 @@ public class ServletController extends HttpServlet {
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.activateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
                             System.out.println("Teaching activated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -426,15 +426,15 @@ public class ServletController extends HttpServlet {
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.deactivateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
                             System.out.println("Teaching deactivated");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -449,16 +449,16 @@ public class ServletController extends HttpServlet {
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.insertBooking(new User(userEmail), new TimeSlot(day, hour), new Teacher(teacherEmail), new Course(title))) {
                             System.out.println("Booking registered");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             System.out.println("Error during booking insertion");
-                            response.sendError(400);
+                            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -473,15 +473,15 @@ public class ServletController extends HttpServlet {
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
                             System.out.println("Booking deleted");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -496,18 +496,18 @@ public class ServletController extends HttpServlet {
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
                             System.out.println("Booking completed");
-                            response.setStatus(201);
+                            response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-                            response.sendError(500);
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
-                        response.sendError(400, "Bad Request");
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
                 }
                 break;
 
             default:
-                response.sendError(400, "Bad Request");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -520,19 +520,35 @@ public class ServletController extends HttpServlet {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         switch (action) {
-            case "list-users":
+            case "list-active-users":
                 if (isLoggedAndAdmin(request)) {
-                    ArrayList<User> users = DAO.queryUsers();
+                    ArrayList<User> users = DAO.queryActiveUsers();
                     out.println(gson.toJson(users));
                     out.flush();
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
-            case "list-teachers":
-                ArrayList<Teacher> teachers = DAO.queryTeachers();
-                out.println(gson.toJson(teachers));
+            case "list-deactivated-users":
+                if (isLoggedAndAdmin(request)) {
+                    ArrayList<User> users = DAO.queryDeactivatedUsers();
+                    out.println(gson.toJson(users));
+                    out.flush();
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+                break;
+
+            case "list-active-teachers":
+                ArrayList<Teacher> activeTeachers = DAO.queryActiveTeachers();
+                out.println(gson.toJson(activeTeachers));
+                out.flush();
+                break;
+
+            case "list-deactivated-teachers":
+                ArrayList<Teacher> deactivatedTeachers = DAO.queryDeactivatedTeachers();
+                out.println(gson.toJson(deactivatedTeachers));
                 out.flush();
                 break;
 
@@ -543,7 +559,7 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(timeSlots));
                     out.flush();
                 } else {
-                    response.sendError(400);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
 
@@ -555,13 +571,19 @@ public class ServletController extends HttpServlet {
                     out.flush();
                 } else {
                     System.out.println("Null title parameter");
-                    response.sendError(400);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
 
-            case "list-courses":
-                ArrayList<Course> courses = DAO.queryCourses();
-                out.println(gson.toJson(courses));
+            case "list-active-courses":
+                ArrayList<Course> activeCourses = DAO.queryActiveCourses();
+                out.println(gson.toJson(activeCourses));
+                out.flush();
+                break;
+
+            case "list-deactivated-courses":
+                ArrayList<Course> deactivatedCourses = DAO.queryDeactivatedCourses();
+                out.println(gson.toJson(deactivatedCourses));
                 out.flush();
                 break;
 
@@ -577,7 +599,7 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(bookings));
                     out.flush();
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -587,7 +609,7 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(activeBookings));
                     out.flush();
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -597,7 +619,7 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(completedBookings));
                     out.flush();
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -607,7 +629,7 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(deletedBookings));
                     out.flush();
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -619,7 +641,7 @@ public class ServletController extends HttpServlet {
                     out.flush();
                 } else {
                     System.out.println("Null user-email parameter");
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -631,7 +653,7 @@ public class ServletController extends HttpServlet {
                     out.flush();
                 } else {
                     System.out.println("Null user-email parameter");
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -643,7 +665,7 @@ public class ServletController extends HttpServlet {
                     out.flush();
                 } else {
                     System.out.println("Null user-email parameter");
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -655,22 +677,32 @@ public class ServletController extends HttpServlet {
                     out.flush();
                 } else {
                     System.out.println("Null user-email parameter");
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
-            case "list-time-slots":
+            case "list-active-time-slots":
                 if (isLogged(request)) {
-                    ArrayList<TimeSlot> timeSlots = DAO.queryTimeSlots();
-                    out.println(gson.toJson(timeSlots));
+                    ArrayList<TimeSlot> activeTimeSlots = DAO.queryActiveTimeSlots();
+                    out.println(gson.toJson(activeTimeSlots));
                     out.flush();
                 } else {
-                    response.sendError(401);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+                break;
+
+            case "list-deactivated-time-slots":
+                if (isLogged(request)) {
+                    ArrayList<TimeSlot> deactivatedTimeSlots = DAO.queryDeactivatedTimeSlots();
+                    out.println(gson.toJson(deactivatedTimeSlots));
+                    out.flush();
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
             default:
-                response.sendError(400, "Bad Request");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 }
