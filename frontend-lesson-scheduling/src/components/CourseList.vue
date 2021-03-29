@@ -26,7 +26,7 @@ export default {
   },
   mounted() {
     axios
-      .get("http://localhost:8080/ServletController?action=list-courses")
+      .get("http://localhost:8080/ServletController?action=list-active-courses")
       .then((response) => (this.courses = response.data))
       .catch(function (error) {
         console.log(error);

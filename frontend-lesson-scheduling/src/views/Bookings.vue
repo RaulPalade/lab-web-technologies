@@ -20,13 +20,13 @@ export default {
     };
   },
   created: function () {
-    this.GetBookings();
+    this.GetAllBookings();
   },
   computed: {
-    ...mapGetters({ Posts: "StateBookings", User: "StateUser" }),
+    ...mapGetters({ Posts: "StateAllBookings", User: "StateUser" }),
   },
   methods: {
-    ...mapActions(["GetBookings"]),
+    ...mapActions(["GetAllBookings"]),
   },
 };
 </script>

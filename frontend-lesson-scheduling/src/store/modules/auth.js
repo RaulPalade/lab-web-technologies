@@ -3,10 +3,13 @@ import axios from 'axios'
 const state = {
     user: null,
     isAdmin: null,
-    users: null,
-    teachers: null,
+    activeUsers: null,
+    deactivatedUsers: null,
+    activeTeachers: null,
+    deactivatedTeachers: null,
     teacherAvailabilities: null,
-    courses: null,
+    activeCourses: null,
+    deactivatedCourses: null,
     teacherCourses: null,
     allBookings: null,
     allActiveBookings: null,
@@ -17,17 +20,21 @@ const state = {
     personalCompletedBookings: null,
     personalDeletedBookings: null,
     teacherByCourse: null,
-    timeSlots: null
+    activeTimeSlots: null,
+    deactivatedTimeSlots: null
 }
 
 const getters = {
     StateUser: state => state.user,
     isAuthenticated: state => !!state.user,
     isAdmin: state => state.isAdmin,
-    StateUsers: state => state.users,
-    StateTeachers: state => state.teachers,
+    StateActiveUsers: state => state.activeUsers,
+    StateDeactivatedUsers: state => state.deactivatedUsers,
+    StateActiveTeachers: state => state.activeTeachers,
+    StateDeactivatedTeachers: state => state.deactivatedTeachers,
     StateTeacherAvailabilities: state => state.teacherAvailabilities,
-    StateCourses: state => state.courses,
+    StateActiveCourses: state => state.activeCourses,
+    StateDeactivatedCourses: state => state.deactivatedCourses,
     StateTeacherCourses: state => state.teacherCourses,
     StateAllBookings: state => state.allBookings,
     StateAllActiveBookings: state => state.allActiveBookings,
@@ -38,7 +45,8 @@ const getters = {
     StateCompletedBookings: state => state.personalCompletedBookings,
     StateDeletedBookings: state => state.personalDeletedBookings,
     StateTeacherByCourse: state => state.teacherByCourse,
-    StateTimeSlots: state => state.timeSlots
+    StateActiveTimeSlots: state => state.activeTimeSlots,
+    StateDeactivatedTimeSlots: state => state.deactivatedTimeSlots
 }
 
 const actions = {
@@ -132,18 +140,32 @@ const actions = {
     },
 
     // GET METHODS
-    async GetUsers({
+    async GetActiveUsers({
         commit
     }) {
-        let users = await axios.get('http://localhost:8080/ServletController?action=list-users')
-        await commit('setUsers', users)
+        let activeUsers = await axios.get('http://localhost:8080/ServletController?action=list-active-users')
+        await commit('setActiveUsers', activeUsers)
     },
 
-    async GetTeachers({
+    async GetDeactivatedUsers({
         commit
     }) {
-        let teachers = await axios.get('http://localhost:8080/ServletController?action=list-teachers')
-        await commit('setTeachers', teachers)
+        let deactivatedUsers = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-users')
+        await commit('setDeactivatedUsers', deactivatedUsers)
+    },
+
+    async GetActiveTeachers({
+        commit
+    }) {
+        let activeTeachers = await axios.get('http://localhost:8080/ServletController?action=list-active-teachers')
+        await commit('setActiveTeachers', activeTeachers)
+    },
+
+    async GetDeactivatedTeachers({
+        commit
+    }) {
+        let deactivatedTeachers = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-teachers')
+        await commit('setDeactivatedTeachers', deactivatedTeachers)
     },
 
     async GetTeacherAvailability({
@@ -153,11 +175,18 @@ const actions = {
         await commit('setTeacherAvailabilities', teacherAvailabilities)
     },
 
-    async GetCourses({
+    async GetActiveCourses({
         commit
     }) {
-        let courses = await axios.get('http://localhost:8080/ServletController?action=list-courses')
-        await commit('setCourses', courses)
+        let activeCourses = await axios.get('http://localhost:8080/ServletController?action=list-active-courses')
+        await commit('setActiveCourses', activeCourses)
+    },
+
+    async GetDeactivatedCourses({
+        commit
+    }) {
+        let deactivatedCourses = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-courses')
+        await commit('setDeactivatedCourses', deactivatedCourses)
     },
 
     async GetTeacherCourses({
@@ -230,11 +259,18 @@ const actions = {
         await commit('setTeacherByCourse', teacherByCourse)
     },
 
-    async GetTimeSlots({
+    async GetActiveTimeSlots({
         commit
     }) {
-        let timeSlots = await axios.get('http://localhost:8080/ServletController?action=list-time-slots')
-        await commit('setTimeSlots', timeSlots)
+        let activeTimeSlots = await axios.get('http://localhost:8080/ServletController?action=list-active-time-slots')
+        await commit('setActiveTimeSlots', activeTimeSlots)
+    },
+
+    async GetDeactivatedTimeSlots({
+        commit
+    }) {
+        let deactivatedTimeSlots = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-time-slots')
+        await commit('setDeactivatedTimeSlots', deactivatedTimeSlots)
     }
 }
 
@@ -249,20 +285,32 @@ const mutations = {
         state.posts = null
     },
 
-    setUsers(users) {
-        state.users = users
+    setActiveUsers(activeUsers) {
+        state.activeUsers = activeUsers
     },
 
-    setTeachers(teachers) {
-        state.teachers = teachers
+    setDeactivatedUsers(deactivatedUsers) {
+        state.deactivatedUsers = deactivatedUsers
+    },
+
+    setActiveTeachers(activeTeachers) {
+        state.activeTeachers = activeTeachers
+    },
+
+    setDeactivatedTeachers(deactivatedTeachers) {
+        state.deactivatedTeachers = deactivatedTeachers
     },
 
     setTeacherAvailabilities(teacherAvailabilities) {
         state.teacherAvailabilities = teacherAvailabilities
     },
 
-    setCourses(courses) {
-        state.courses = courses
+    setActiveCourses(activeCourses) {
+        state.activeCourses = activeCourses
+    },
+
+    setDeactivatedCourses(deactivatedCourses) {
+        state.deactivatedCourses = deactivatedCourses
     },
 
     setTeacherCourses(teacherCourses) {
@@ -305,8 +353,12 @@ const mutations = {
         state.teacherByCourse = teacherByCourse
     },
 
-    setTimeSlots(timeSlots) {
-        state.timeSlots = timeSlots
+    setActiveTimeSlots(activeTimeSlots) {
+        state.activeTimeSlots = activeTimeSlots
+    },
+
+    setDeactivatedTimeSlots(deactivatedTimeSlots) {
+        state.deactivatedTimeSlots = deactivatedTimeSlots
     }
 }
 
