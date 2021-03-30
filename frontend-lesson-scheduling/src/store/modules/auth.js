@@ -144,133 +144,133 @@ const actions = {
         commit
     }) {
         let activeUsers = await axios.get('http://localhost:8080/ServletController?action=list-active-users')
-        await commit('setActiveUsers', activeUsers)
+        await commit('setActiveUsers', activeUsers.data)
     },
 
     async GetDeactivatedUsers({
         commit
     }) {
         let deactivatedUsers = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-users')
-        await commit('setDeactivatedUsers', deactivatedUsers)
+        await commit('setDeactivatedUsers', deactivatedUsers.data)
     },
 
     async GetActiveTeachers({
         commit
     }) {
         let activeTeachers = await axios.get('http://localhost:8080/ServletController?action=list-active-teachers')
-        await commit('setActiveTeachers', activeTeachers)
+        await commit('setActiveTeachers', activeTeachers.data)
     },
 
     async GetDeactivatedTeachers({
         commit
     }) {
         let deactivatedTeachers = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-teachers')
-        await commit('setDeactivatedTeachers', deactivatedTeachers)
+        await commit('setDeactivatedTeachers', deactivatedTeachers.data)
     },
 
     async GetTeacherAvailability({
         commit
     }, Teacher) {
         let teacherAvailabilities = await axios.get('http://localhost:8080/ServletController?action=list-teachers-availability', Teacher)
-        await commit('setTeacherAvailabilities', teacherAvailabilities)
+        await commit('setTeacherAvailabilities', teacherAvailabilities.data)
     },
 
     async GetActiveCourses({
         commit
     }) {
         let activeCourses = await axios.get('http://localhost:8080/ServletController?action=list-active-courses')
-        await commit('setActiveCourses', activeCourses)
+        await commit('setActiveCourses', activeCourses.data)
     },
 
     async GetDeactivatedCourses({
         commit
     }) {
         let deactivatedCourses = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-courses')
-        await commit('setDeactivatedCourses', deactivatedCourses)
+        await commit('setDeactivatedCourses', deactivatedCourses.data)
     },
 
     async GetTeacherCourses({
         commit
     }) {
         let teacherCourses = await axios.get('http://localhost:8080/ServletController?action=list-teacher-courses')
-        await commit('setTeacherCourses', teacherCourses)
+        await commit('setTeacherCourses', teacherCourses.data)
     },
 
     async GetAllBookings({
         commit
     }) {
         let allBookings = await axios.get('http://localhost:8080/ServletController?action=list-all-bookings')
-        await commit('setAllBookings', allBookings)
+        await commit('setAllBookings', allBookings.data)
     },
 
     async GetAllActiveBookings({
         commit
     }) {
         let allActiveBookings = await axios.get('http://localhost:8080/ServletController?action=list-all-active-bookings')
-        await commit('setAllActiveBookings', allActiveBookings)
+        await commit('setAllActiveBookings', allActiveBookings.data)
     },
 
     async GetAllCompletedBookings({
         commit
     }) {
         let allCompletedBookings = await axios.get('http://localhost:8080/ServletController?action=list-all-completed-bookings')
-        await commit('setAllCompletedBookings', allCompletedBookings)
+        await commit('setAllCompletedBookings', allCompletedBookings.data)
     },
 
     async GetAllDeletedBookings({
         commit
     }) {
         let allDeletedBookings = await axios.get('http://localhost:8080/ServletController?action=list-all-deleted-bookings')
-        await commit('setAllDeletedBookings', allDeletedBookings)
+        await commit('setAllDeletedBookings', allDeletedBookings.data)
     },
 
     async GetPersonalBooking({
         commit
     }, User) {
         let personalBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-bookings', User)
-        await commit('setPersonalBookings', personalBookings)
+        await commit('setPersonalBookings', personalBookings.data)
     },
 
     async GetPersonalActiveBooking({
         commit
     }, User) {
         let personalActiveBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-active-bookings', User)
-        await commit('setPersonalActiveBookings', personalActiveBookings)
+        await commit('setPersonalActiveBookings', personalActiveBookings.data)
     },
 
     async GetPersonalCompletedBooking({
         commit
     }, User) {
         let personalCompletedBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-completed-bookings', User)
-        await commit('setPersonalCompletedBookings', personalCompletedBookings)
+        await commit('setPersonalCompletedBookings', personalCompletedBookings.data)
     },
 
     async GetPersonalDeletedBooking({
         commit
     }, User) {
         let personalDeletedBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-deleted-bookings', User)
-        await commit('setPersonalDeletedBookings', personalDeletedBookings)
+        await commit('setPersonalDeletedBookings', personalDeletedBookings.data)
     },
 
     async GetTeacherByCourse({
         commit
     }, Course) {
         let teacherByCourse = await axios.get('http://localhost:8080/ServletController?action=list-teacher-by-course', Course)
-        await commit('setTeacherByCourse', teacherByCourse)
+        await commit('setTeacherByCourse', teacherByCourse.data)
     },
 
     async GetActiveTimeSlots({
         commit
     }) {
         let activeTimeSlots = await axios.get('http://localhost:8080/ServletController?action=list-active-time-slots')
-        await commit('setActiveTimeSlots', activeTimeSlots)
+        await commit('setActiveTimeSlots', activeTimeSlots.data)
     },
 
     async GetDeactivatedTimeSlots({
         commit
     }) {
         let deactivatedTimeSlots = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-time-slots')
-        await commit('setDeactivatedTimeSlots', deactivatedTimeSlots)
+        await commit('setDeactivatedTimeSlots', deactivatedTimeSlots.data)
     }
 }
 
@@ -285,79 +285,79 @@ const mutations = {
         state.posts = null
     },
 
-    setActiveUsers(activeUsers) {
+    setActiveUsers(state, activeUsers) {
         state.activeUsers = activeUsers
     },
 
-    setDeactivatedUsers(deactivatedUsers) {
+    setDeactivatedUsers(state, deactivatedUsers) {
         state.deactivatedUsers = deactivatedUsers
     },
 
-    setActiveTeachers(activeTeachers) {
+    setActiveTeachers(state, activeTeachers) {
         state.activeTeachers = activeTeachers
     },
 
-    setDeactivatedTeachers(deactivatedTeachers) {
+    setDeactivatedTeachers(state, deactivatedTeachers) {
         state.deactivatedTeachers = deactivatedTeachers
     },
 
-    setTeacherAvailabilities(teacherAvailabilities) {
+    setTeacherAvailabilities(state, teacherAvailabilities) {
         state.teacherAvailabilities = teacherAvailabilities
     },
 
-    setActiveCourses(activeCourses) {
+    setActiveCourses(state, activeCourses) {
         state.activeCourses = activeCourses
     },
 
-    setDeactivatedCourses(deactivatedCourses) {
+    setDeactivatedCourses(state, deactivatedCourses) {
         state.deactivatedCourses = deactivatedCourses
     },
 
-    setTeacherCourses(teacherCourses) {
+    setTeacherCourses(state, teacherCourses) {
         state.teacherCourses = teacherCourses
     },
 
-    setAllBookings(allBookings) {
+    setAllBookings(state, allBookings) {
         state.allBookings = allBookings
     },
 
-    setAllActiveBookings(allActiveBookings) {
+    setAllActiveBookings(state, allActiveBookings) {
         state.allActiveBookings = allActiveBookings
     },
 
-    setAllCompletedBookings(allCompletedBookings) {
+    setAllCompletedBookings(state, allCompletedBookings) {
         state.allCompletedBookings = allCompletedBookings
     },
 
-    setAllDeletedBookings(allDeletedBookings) {
+    setAllDeletedBookings(state, allDeletedBookings) {
         state.allDeletedBookings = allDeletedBookings
     },
 
-    setPersonalBookings(personalBookings) {
+    setPersonalBookings(state, personalBookings) {
         state.personalBookings = personalBookings
     },
 
-    setPersonalActiveBookings(personalActiveBookings) {
+    setPersonalActiveBookings(state, personalActiveBookings) {
         state.personalActiveBookings = personalActiveBookings
     },
 
-    setPersonalCompletedBookings(personalCompletedBookings) {
+    setPersonalCompletedBookings(state, personalCompletedBookings) {
         state.personalCompletedBookings = personalCompletedBookings
     },
 
-    setPersonalDeletedBookings(personalDeletedBookings) {
+    setPersonalDeletedBookings(state, personalDeletedBookings) {
         state.personalDeletedBookings = personalDeletedBookings
     },
 
-    setTeacherByCourse(teacherByCourse) {
+    setTeacherByCourse(state, teacherByCourse) {
         state.teacherByCourse = teacherByCourse
     },
 
-    setActiveTimeSlots(activeTimeSlots) {
+    setActiveTimeSlots(state, activeTimeSlots) {
         state.activeTimeSlots = activeTimeSlots
     },
 
-    setDeactivatedTimeSlots(deactivatedTimeSlots) {
+    setDeactivatedTimeSlots(state, deactivatedTimeSlots) {
         state.deactivatedTimeSlots = deactivatedTimeSlots
     }
 }
