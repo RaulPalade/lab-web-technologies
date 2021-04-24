@@ -1,40 +1,71 @@
 <template>
   <div id="app">
-    <Nav />
-    <router-view />
+    <div class="content mb-3">
+      <div id="navbar">
+        <Navbar />
+      </div>
+      <router-view />
+    </div>
+
+    <div id="footer">
+      <Footer />
+    </div>
   </div>
 </template>
 
 <script>
-import Nav from "./components/partials/Nav";
+import Navbar from "./components/partials/Navbar";
+import Footer from "./components/partials/Footer";
 
 export default {
   name: "App",
   components: {
-    Nav,
+    Navbar,
+    Footer,
   },
 };
 </script>
 
 <style lang="scss">
+@import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,900;1,900&display=swap");
+// @import url("https://fonts.googleapis.com/css2?family=Lilita+One&display=swap");
+* {
+  box-sizing: border-box;
+  background: #fff;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: "Raleway", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
 }
 
-#nav {
-  padding: 30px;
+.content {
+  flex: 1 0 auto;
+}
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+#navbar {
+  font-weight: 900;
+  box-shadow: 0 8px 6px -6px #60d69a;
+  margin-bottom: 2rem;
+  font-size: 1.3rem;
+}
 
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+#footer {
+  font-weight: 900;
+  flex-shrink: 0;
 }
 </style>

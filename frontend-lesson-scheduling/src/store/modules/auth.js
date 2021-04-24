@@ -56,7 +56,8 @@ const actions = {
         commit
     }, User) {
         let isAdmin = await axios.post('http://localhost:8080/ServletController?action=login', User)
-        await commit('loginUser', User.email, isAdmin)
+        await commit('loginUser', User.email)
+        await commit('setAdmin', isAdmin.data)
     },
 
     async LogOut({
@@ -200,6 +201,7 @@ const actions = {
         commit
     }) {
         let allBookings = await axios.get('http://localhost:8080/ServletController?action=list-all-bookings')
+        console.log(allBookings.data)
         await commit('setAllBookings', allBookings.data)
     },
 
@@ -275,14 +277,16 @@ const actions = {
 }
 
 const mutations = {
-    loginUser(state, email, isAdmin) {
+    loginUser(state, email) {
         state.user = email
+    },
+
+    setAdmin(state, isAdmin) {
         state.isAdmin = isAdmin
     },
 
     logoutUser(state) {
         state.user = null
-        state.posts = null
     },
 
     setActiveUsers(state, activeUsers) {

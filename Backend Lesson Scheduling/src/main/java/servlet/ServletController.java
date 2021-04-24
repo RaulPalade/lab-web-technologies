@@ -95,13 +95,13 @@ public class ServletController extends HttpServlet {
                     HttpSession session = request.getSession();
                     String jSessionId = session.getId();
                     session.setAttribute("emailUser", userEmail);
-                    session.setAttribute("isAdmin", DAO.isAdmin(new User(userEmail)));
+                    boolean isAdmin = DAO.isAdmin(new User(userEmail));
                     session.setMaxInactiveInterval(30 * 60);
                     Cookie userCookie = new Cookie("userCookie", userEmail);
                     userCookie.setMaxAge(30 * 60);
                     response.addCookie(userCookie);
                     PrintWriter out = response.getWriter();
-                    out.println(session.getAttribute("isAdmin"));
+                    out.println(isAdmin);
                     System.out.println("Login Success with jSessionID: " + jSessionId);
                 } else {
                     System.out.println("Wrong Email or Password");

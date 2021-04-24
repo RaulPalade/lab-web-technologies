@@ -1,19 +1,30 @@
 <template>
-  <div class="login">
-    <div>
+  <div class="mb-3">
+    <b-card title="Accedi al tuo account" class="login w-25">
       <form @submit.prevent="submit">
-        <div>
-          <label for="username">Email: </label>
-          <input type="text" name="email" v-model="form.email" />
-        </div>
-        <div>
-          <label for="password">Password: </label>
-          <input type="password" name="password" v-model="form.password" />
-        </div>
-        <button type="submit">Submit</button>
+        <b-form-group class="my-5" label="Email" label-for="email">
+          <b-form-input
+            v-model="form.email"
+            type="email"
+            placeholder="Inserisci l'email"
+            required
+          ></b-form-input>
+        </b-form-group>
+
+        <b-form-group class="my-5" label="Password" label-for="password">
+          <b-form-input
+            v-model="form.password"
+            type="password"
+            placeholder="Inserisci la password"
+            required
+          ></b-form-input>
+        </b-form-group>
+        <b-button class="btn my-3 py-2 btn-block" type="submit"
+          >Accedi</b-button
+        >
       </form>
-      <p v-if="showError" id="error">Email or Password is incorrect</p>
-    </div>
+    </b-card>
+    <p v-if="showError" id="error">Email or Password is incorrect</p>
   </div>
 </template>
 
@@ -53,30 +64,27 @@ export default {
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
+.login {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-color: #017d91;
+  box-shadow: 0 8px 6px -6px #60d69a;
 }
-label {
-  padding: 12px 12px 12px 0;
-  display: inline-block;
+
+form {
+  text-align: left;
+  align-items: center;
 }
-button[type="submit"] {
-  background-color: #4caf50;
-  color: white;
-  padding: 12px 20px;
-  cursor: pointer;
-  border-radius: 30px;
+
+.btn {
+  border-style: none;
+  background: #017d91;
 }
-button[type="submit"]:hover {
-  background-color: #45a049;
-}
-input {
-  margin: 5px;
-  box-shadow: 0 0 15px 4px rgba(0, 0, 0, 0.06);
-  padding: 10px;
-  border-radius: 30px;
-}
-#error {
-  color: red;
+
+.btn:hover {
+  background: #60d69a;
+  transition: 0.5s all ease-in-out;
 }
 </style>

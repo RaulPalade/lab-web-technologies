@@ -25,6 +25,7 @@ public class CorsFilter implements Filter {
         String action = request.getParameter("action");
 
         if (action != null) {
+            System.out.println("Action: " + action);
             chain.doFilter(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);

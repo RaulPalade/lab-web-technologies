@@ -1,21 +1,29 @@
 <template>
-  <b-container fluid>
-    <div v-if="courses">
-      <b-row cols="4" align-v="start">
-        <b-col v-for="course in courses" :course="course" :key="course.id">
-          <p>
-            <router-link :to="'/course/' + course.id">
-              <CourseCard :course="course" />
-            </router-link></p
-        ></b-col>
+  <div class="cards">
+    <b-container class="mt-3 d-inline align-items-stretch">
+      <b-row>
+        <b-col>
+          <carousel autoplay :paginationSize="12" :perPage="4">
+            <slide
+              v-for="course in courses"
+              :course="course"
+              :key="course.id"
+              class="p-2"
+            >
+              <p>
+                <router-link :to="'/course/' + course.title">
+                  <CourseCard :course="course" />
+                </router-link>
+              </p>
+            </slide>
+          </carousel>
+        </b-col>
       </b-row>
-    </div>
-    <div v-else>Nessun corso</div>
-  </b-container>
+    </b-container>
+  </div>
 </template>
 
 <script>
-// import axios from "axios";
 import CourseCard from "./CourseCard";
 import { mapGetters, mapActions } from "vuex";
 
@@ -24,19 +32,12 @@ export default {
   components: {
     CourseCard,
   },
-  // data() {
-  //   return {
-  //     courses: [],
-  //   };
-  // },
-  // mounted() {
-  //   axios
-  //     .get("http://localhost:8080/ServletController?action=list-active-courses")
-  //     .then((response) => (this.courses = response.data))
-  //     .catch(function (error) {
-  //       console.log(error);
-  //     });
-  // },
+  data() {
+    return {
+      slide: 0,
+      sliding: null,
+    };
+  },
   created: function () {
     this.GetActiveCourses();
   },
@@ -45,9 +46,15 @@ export default {
   },
   methods: {
     ...mapActions(["GetActiveCourses"]),
+    onSlideStart() {
+      this.sliding = true;
+    },
+    onSlideEnd() {
+      this.sliding = false;
+    },
   },
 };
 </script>
 
-<style scoped>
+<style lang="scss">
 </style>
