@@ -5,7 +5,6 @@ import Home from "../views/Home.vue";
 import AdminDashboard from "../views/AdminDashboard.vue";
 import About from "../views/About.vue"
 import Login from "../views/Login";
-import Bookings from "../views/Bookings";
 
 Vue.use(VueRouter);
 
@@ -18,6 +17,15 @@ const routes = [{
     path: "/adminDashboard",
     name: "AdminDashboard",
     component: AdminDashboard,
+    async beforeEnter(to, from, next) {
+      if (store.getters.isAuthenticated && store.getters.isAdmin) {
+        next();
+      } else {
+        next({
+          name: "Home"
+        })
+      }
+    }
   },
   {
     path: "/about",
@@ -34,23 +42,6 @@ const routes = [{
     meta: {
       guest: true
     },
-  },
-  {
-    path: "/bookings",
-    name: "Bookings",
-    component: Bookings,
-    // meta: {
-    //   requiresAuth: true
-    // },
-    async beforeEnter(to, from, next) {
-      if (store.getters.isAuthenticated && store.getters.isAdmin) {
-        next();
-      } else {
-        next({
-          name: "Home"
-        })
-      }
-    }
   },
 ];
 

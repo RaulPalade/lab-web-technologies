@@ -145,6 +145,7 @@ const actions = {
         commit
     }) {
         let activeUsers = await axios.get('http://localhost:8080/ServletController?action=list-active-users')
+        console.log(activeUsers.data)
         await commit('setActiveUsers', activeUsers.data)
     },
 
