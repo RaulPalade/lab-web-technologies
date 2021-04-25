@@ -1,6 +1,6 @@
 <template>
-  <div class="bookings">
-    <h3>Prenotazioni</h3>
+  <div class="user-list">
+    <h3>Lista Docenti</h3>
     <b-container fluid>
       <!-- User Interface controls -->
       <b-row>
@@ -79,10 +79,8 @@
               :aria-describedby="ariaDescribedby"
               name="radio-sub-component"
             >
-              <b-form-radio value="first" default>Tutte</b-form-radio>
-              <b-form-radio value="second">Attive</b-form-radio>
-              <b-form-radio value="third">Completate</b-form-radio>
-              <b-form-radio value="fourth">Cancellate</b-form-radio>
+              <b-form-radio value="first" default>Attivi</b-form-radio>
+              <b-form-radio value="second">Non Attivi</b-form-radio>
             </b-form-radio-group>
           </b-form-group>
         </b-col>
@@ -90,7 +88,7 @@
 
       <!-- Main table element -->
       <b-table
-        :items="Bookings"
+        :items="ActiveTeacherList"
         :fields="fields"
         :current-page="currentPage"
         :per-page="perPage"
@@ -103,16 +101,8 @@
         show-empty
         @filtered="onFiltered"
       >
-        <template #cell(user)="row">
-          {{ row.value.name }} {{ row.value.surname }}
-        </template>
-
-        <template #cell(teacherCourse)="row">
-          {{ row.value.teacher.name }} {{ row.value.teacher.surname }}
-        </template>
-
-        <template #cell(timeSlot)="row">
-          {{ row.value.day }} ore {{ row.value.hour }}
+        <template #cell(cellName)="row">
+          {{ row.value.first }} {{ row.value.last }}
         </template>
 
         <template #cell(actions)="row">
@@ -150,7 +140,7 @@
         ></b-pagination>
       </b-col>
 
-      <b-col sm="5" class="my-1">
+      <b-col sm="4" class="my-1">
         <b-form-group
           label="Per pagina"
           label-for="per-page-select"
@@ -186,20 +176,18 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 export default {
-  name: "Bookings",
+  name: "ActiveTeacherList",
   mounted() {
-    // Set the initial number of items
-    this.totalRows = this.Bookings.length;
+    this.totalRows = this.ActiveTeacherList.length;
   },
   created: function() {
-    this.GetAllBookings();
-    this.GetAllActiveBookings();
+    this.GetActiveTeachers();
+    this.GetDeactivatedTeachers();
   },
   computed: {
     ...mapGetters({
-      Bookings: "StateAllBookings",
-      ActiveBookings: "StateAllActiveBookings",
-      User: "StateUser",
+      ActiveTeacherList: "StateActiveTeachers",
+      DeactivatedTeacherList: "StateDeactivatedTeachers",
     }),
     sortOptions() {
       // Create an options list from our fields
@@ -211,7 +199,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["GetAllBookings", "GetAllActiveBookings"]),
+    ...mapActions(["GetActiveTeachers", "GetDeactivatedTeachers"]),
     info(item, index, button) {
       this.infoModal.title = `Row index: ${index}`;
       this.infoModal.content = JSON.stringify(item, null, 2);
@@ -231,10 +219,9 @@ export default {
   data() {
     return {
       fields: [
-        { key: "user", label: "Studente", sortable: "true" },
-        { key: "teacherCourse", label: "Docente", sortable: "true" },
-        { key: "teacherCourse.course.title", label: "Corso", sortable: "true" },
-        { key: "timeSlot", label: "Data", sortable: "true" },
+        { key: "name", label: "Nome", sortable: true },
+        { key: "surname", label: "Cognome", sortable: true },
+        { key: "email", label: "E-mail", sortable: true },
       ],
       totalRows: 1,
       currentPage: 1,

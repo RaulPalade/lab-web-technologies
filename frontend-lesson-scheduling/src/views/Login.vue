@@ -53,7 +53,7 @@ export default {
 
       try {
         await this.LogIn(User);
-        this.$router.push("/bookings");
+        this.$router.push("/adminDashboard");
         this.showError = false;
       } catch (error) {
         this.showError = true;

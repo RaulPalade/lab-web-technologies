@@ -23,14 +23,7 @@
               >
             </span>
           </b-nav-item>
-          <b-nav-item>
-            <router-link
-              to="/bookings"
-              class="navbar-item nav-link nav-link-ltr"
-            >
-              Prenotazioni
-            </router-link>
-          </b-nav-item>
+
           <b-nav-item>
             <router-link to="/about" class="navbar-item nav-link nav-link-ltr"
               >About</router-link
@@ -54,10 +47,10 @@
 export default {
   name: "Navbar",
   computed: {
-    isLoggedIn: function () {
+    isLoggedIn: function() {
       return this.$store.getters.isAuthenticated;
     },
-    isAdmin: function () {
+    isAdmin: function() {
       return this.$store.getters.isAdmin;
     },
   },

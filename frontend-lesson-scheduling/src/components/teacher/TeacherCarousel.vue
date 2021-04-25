@@ -24,11 +24,11 @@ import TeacherCard from "./TeacherCard";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
-  name: "TeacherList",
+  name: "TeacherCarousel",
   components: {
     TeacherCard,
   },
-  created: function () {
+  created: function() {
     this.GetActiveTeachers();
   },
   computed: {
@@ -40,5 +40,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

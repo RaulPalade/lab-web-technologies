@@ -28,7 +28,7 @@ import CourseCard from "./CourseCard";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
-  name: "CoursList",
+  name: "CoursCarousel",
   components: {
     CourseCard,
   },
@@ -38,7 +38,7 @@ export default {
       sliding: null,
     };
   },
-  created: function () {
+  created: function() {
     this.GetActiveCourses();
   },
   computed: {
@@ -56,5 +56,4 @@ export default {
 };
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

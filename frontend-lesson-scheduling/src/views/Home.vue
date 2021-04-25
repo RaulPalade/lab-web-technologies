@@ -15,23 +15,23 @@
 
     <div class="mt-5">
       <h3>CORSI DISPONIBILI</h3>
-      <CourseList />
+      <CourseCarousel />
       <h3>DOCENTI DISPONIBILI</h3>
-      <TeacherList />
+      <TeacherCarousel />
     </div>
   </div>
 </template>
 
 <script>
-import CourseList from "@/components/CourseList";
-import TeacherList from "@/components/TeacherList";
+import CourseCarousel from "@/components/course/CourseCarousel";
+import TeacherCarousel from "@/components/teacher/TeacherCarousel";
 import introImage from "@/assets/intro/3718985.jpg";
 
 export default {
   name: "Home",
   components: {
-    CourseList,
-    TeacherList,
+    CourseCarousel,
+    TeacherCarousel,
   },
   data() {
     return { introImage };
