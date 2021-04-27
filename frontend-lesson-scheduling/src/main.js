@@ -11,14 +11,15 @@ import VueAxios from 'vue-axios'
 // Import Bootstrap an BootstrapVue CSS files (order is important)
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+
 import store from './store'
 
 // Import Font Awesome
 import '@fortawesome/fontawesome-free/css/all.css'
-import '@fortawesome/fontawesome-free/js/all.js'
+// import '@fortawesome/fontawesome-free/js/all.js'
 
 import VueCarousel from 'vue-carousel';
-
+import VueBootstrapToasts from "vue-bootstrap-toasts";
 
 // Make BootstrapVue available throughout your project
 Vue.use(BootstrapVue)
@@ -28,6 +29,8 @@ Vue.use(IconsPlugin)
 Vue.use(VueAxios, axios)
 
 Vue.use(VueCarousel)
+Vue.use(VueBootstrapToasts);
+
 
 Vue.config.productionTip = false
 axios.defaults.withCredentials = true

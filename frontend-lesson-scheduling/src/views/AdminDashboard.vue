@@ -8,8 +8,9 @@
               button
               v-bind:class="{ active: isSelected(0) }"
               v-on:click="selected = 0"
-              class="d-flex justify-content-between align-items-center"
+              class="d-flex align-items-center"
             >
+              <i class="fas fa-calendar-alt fa-fw mr-2"></i>
               Lista Prenotazioni
             </b-list-group-item>
 
@@ -17,8 +18,9 @@
               button
               v-bind:class="{ active: isSelected(1) }"
               v-on:click="selected = 1"
-              class="d-flex justify-content-between align-items-center"
+              class="d-flex align-items-center"
             >
+              <i class="fas fa-user-graduate fa-fw mr-2"></i>
               Lista Utenti
             </b-list-group-item>
 
@@ -26,8 +28,9 @@
               button
               v-bind:class="{ active: isSelected(2) }"
               v-on:click="selected = 2"
-              class="d-flex justify-content-between align-items-center"
+              class="d-flex align-items-center"
             >
+              <i class="fas fa-chalkboard-teacher fa-fw mr-2"></i>
               Lista Docenti
             </b-list-group-item>
 
@@ -35,24 +38,26 @@
               button
               v-bind:class="{ active: isSelected(3) }"
               v-on:click="selected = 3"
-              class="d-flex justify-content-between align-items-center"
+              class="d-flex align-items-center"
             >
+              <i class="fab fa-leanpub fa-fw mr-2"></i>
               Lista Corsi
             </b-list-group-item>
 
             <b-list-group-item
               button
               v-bind:class="{ active: isSelected(4) }"
-              v-on:click="selected = 5"
-              class="d-flex justify-content-between align-items-center"
+              v-on:click="selected = 4"
+              class="d-flex align-items-center"
             >
+              <i class="fas fa-clock fa-fw mr-2"></i>
               Lista Slot Orari
             </b-list-group-item>
 
             <b-list-group-item
               button
               v-bind:class="{ active: isSelected(5) }"
-              v-on:click="selected = 6"
+              v-on:click="selected = 5"
               class="d-flex justify-content-between align-items-center"
             >
               Inserisci Utente
@@ -61,7 +66,7 @@
             <b-list-group-item
               button
               v-bind:class="{ active: isSelected(6) }"
-              v-on:click="selected = 7"
+              v-on:click="selected = 6"
               class="d-flex justify-content-between align-items-center"
             >
               Inserisci Docente
@@ -70,7 +75,7 @@
             <b-list-group-item
               button
               v-bind:class="{ active: isSelected(7) }"
-              v-on:click="selected = 8"
+              v-on:click="selected = 7"
               class="d-flex justify-content-between align-items-center"
             >
               Inserisci Corso
@@ -79,7 +84,7 @@
             <b-list-group-item
               button
               v-bind:class="{ active: isSelected(8) }"
-              v-on:click="selected = 9"
+              v-on:click="selected = 8"
               class="d-flex justify-content-between align-items-center"
             >
               Inserisci Insegnamento
@@ -88,7 +93,7 @@
             <b-list-group-item
               button
               v-bind:class="{ active: isSelected(9) }"
-              v-on:click="selected = 10"
+              v-on:click="selected = 9"
               class="d-flex justify-content-between align-items-center"
             >
               Inserisci Slot Orario

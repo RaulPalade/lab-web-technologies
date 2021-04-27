@@ -72,12 +72,21 @@ const actions = {
         await axios.post('http://localhost:8080/ServletController?action=insert-user', newUser)
     },
 
-    async ActivateUser(User) {
-        await axios.post('http://localhost:8080/ServletController?action=activate-user', User)
+    async ActivateUser({
+        dispatch
+    }, User) {
+        let response = await axios.post('http://localhost:8080/ServletController?action=activate-user', User)
+        console.log(response)
+        await dispatch("GetActiveUsers")
+        await dispatch("GetDeactivatedUsers")
     },
 
-    async DectivateUser(User) {
+    async DeactivateUser({
+        dispatch
+    }, User) {
         await axios.post('http://localhost:8080/ServletController?action=deactivate-user', User)
+        await dispatch("GetActiveUsers")
+        await dispatch("GetDeactivatedUsers")
     },
 
     async InsertTeacher(newTeacher) {
@@ -88,7 +97,7 @@ const actions = {
         await axios.post('http://localhost:8080/ServletController?action=activate-teacher', Teacher)
     },
 
-    async DectivateTeacher(Teacher) {
+    async DeactivateTeacher(Teacher) {
         await axios.post('http://localhost:8080/ServletController?action=deactivate-teacher', Teacher)
     },
 
@@ -100,7 +109,7 @@ const actions = {
         await axios.post('http://localhost:8080/ServletController?action=activate-course', Course)
     },
 
-    async DectivateCourse(Course) {
+    async DeactivateCourse(Course) {
         await axios.post('http://localhost:8080/ServletController?action=deactivate-course', Course)
     },
 
@@ -112,7 +121,7 @@ const actions = {
         await axios.post('http://localhost:8080/ServletController?action=activate-time-slot', TimeSlot)
     },
 
-    async DectivateTimeSlot(TimeSlot) {
+    async DeactivateTimeSlot(TimeSlot) {
         await axios.post('http://localhost:8080/ServletController?action=deactivate-time-slot', TimeSlot)
     },
 
@@ -145,7 +154,6 @@ const actions = {
         commit
     }) {
         let activeUsers = await axios.get('http://localhost:8080/ServletController?action=list-active-users')
-        console.log(activeUsers.data)
         await commit('setActiveUsers', activeUsers.data)
     },
 
@@ -202,7 +210,6 @@ const actions = {
         commit
     }) {
         let allBookings = await axios.get('http://localhost:8080/ServletController?action=list-all-bookings')
-        console.log(allBookings.data)
         await commit('setAllBookings', allBookings.data)
     },
 

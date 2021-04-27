@@ -74,18 +74,18 @@ public class ServletController extends HttpServlet {
 
         String action = request.getParameter("action");
 
+        String jsonString;
+        JsonObject jsonObject;
+
         switch (action) {
             case "login":
-                String jsonString = readJSONRequest(request);
-                JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
 
                 userEmail = jsonObject.get("email").getAsString();
                 System.out.println(userEmail);
                 password = jsonObject.get("password").getAsString();
                 System.out.println(password);
-
-                /*userEmail = request.getParameter("email");
-                password = request.getParameter("password");*/
 
                 System.out.println("------");
                 System.out.println(userEmail);
@@ -129,10 +129,12 @@ public class ServletController extends HttpServlet {
 
             case "insert-user":
                 if (isLoggedAndAdmin(request)) {
-                    userName = request.getParameter("name");
-                    userSurname = request.getParameter("surname");
-                    userEmail = request.getParameter("email");
-                    boolean administrator = Boolean.parseBoolean(request.getParameter("administrator"));
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    userName = jsonObject.get("userName").getAsString();
+                    userSurname = jsonObject.get("userSurname").getAsString();
+                    userEmail = jsonObject.get("userEmail").getAsString();
+                    boolean administrator = jsonObject.get("administrator").getAsBoolean();
                     password = "password1";
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
@@ -153,9 +155,11 @@ public class ServletController extends HttpServlet {
 
             case "activate-user":
                 if (isLoggedAndAdmin(request)) {
-                    userName = request.getParameter("name");
-                    userSurname = request.getParameter("surname");
-                    userEmail = request.getParameter("email");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    userName = jsonObject.get("userName").getAsString();
+                    userSurname = jsonObject.get("userSurname").getAsString();
+                    userEmail = jsonObject.get("userEmail").getAsString();
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
                         if (DAO.activateUser(new User(userName, userSurname, userEmail))) {
@@ -173,9 +177,11 @@ public class ServletController extends HttpServlet {
 
             case "deactivate-user":
                 if (isLoggedAndAdmin(request)) {
-                    userName = request.getParameter("name");
-                    userSurname = request.getParameter("surname");
-                    userEmail = request.getParameter("email");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    userName = jsonObject.get("userName").getAsString();
+                    userSurname = jsonObject.get("userSurname").getAsString();
+                    userEmail = jsonObject.get("userEmail").getAsString();
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
                         if (DAO.deactivateUser(new User(userName, userSurname, userEmail))) {

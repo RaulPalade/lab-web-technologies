@@ -51,6 +51,8 @@ export default {
         password: this.form.password,
       };
 
+      console.log(User);
+
       try {
         await this.LogIn(User);
         this.$router.push("/adminDashboard");
