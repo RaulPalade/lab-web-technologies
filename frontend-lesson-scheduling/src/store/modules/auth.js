@@ -51,6 +51,8 @@ const getters = {
 
 const actions = {
 
+    // TODO: Aggiungere il dispatch anche ai metodi di inserimento per aggiornare le liste 
+
     // POST METHODS
     async LogIn({
         commit
@@ -93,60 +95,103 @@ const actions = {
         await axios.post('http://localhost:8080/ServletController?action=insert-teacher', newTeacher)
     },
 
-    async ActivateTeacher(Teacher) {
+    async ActivateTeacher({
+        dispatch
+    }, Teacher) {
         await axios.post('http://localhost:8080/ServletController?action=activate-teacher', Teacher)
+        await dispatch("GetActiveTeachers")
+        await dispatch("GetDeactivatedTeachers")
     },
 
-    async DeactivateTeacher(Teacher) {
+    async DeactivateTeacher({
+        dispatch
+    }, Teacher) {
         await axios.post('http://localhost:8080/ServletController?action=deactivate-teacher', Teacher)
+        await dispatch("GetActiveTeachers")
+        await dispatch("GetDeactivatedTeachers")
     },
 
     async InsertCourse(newCourse) {
         await axios.post('http://localhost:8080/ServletController?action=insert-course', newCourse)
     },
 
-    async ActivateCourse(Course) {
+    async ActivateCourse({
+        dispatch
+    }, Course) {
         await axios.post('http://localhost:8080/ServletController?action=activate-course', Course)
+        await dispatch("GetActiveCourses")
+        await dispatch("GetDeactivatedCourses")
     },
 
-    async DeactivateCourse(Course) {
+    async DeactivateCourse({
+        dispatch
+    }, Course) {
         await axios.post('http://localhost:8080/ServletController?action=deactivate-course', Course)
+        await dispatch("GetActiveCourses")
+        await dispatch("GetDeactivatedCourses")
     },
 
     async InsertTimeSlot(newTimeSlot) {
         await axios.post('http://localhost:8080/ServletController?action=insert-time-slot', newTimeSlot)
     },
 
-    async ActivateTimeSlot(TimeSlot) {
+    async ActivateTimeSlot({
+        dispatch
+    }, TimeSlot) {
+        console.log(TimeSlot)
         await axios.post('http://localhost:8080/ServletController?action=activate-time-slot', TimeSlot)
+        await dispatch("GetActiveTimeSlots")
+        await dispatch("GetDeactivatedTimeSlots")
     },
 
-    async DeactivateTimeSlot(TimeSlot) {
+    async DeactivateTimeSlot({
+        dispatch
+    }, TimeSlot) {
+        console.log(TimeSlot)
         await axios.post('http://localhost:8080/ServletController?action=deactivate-time-slot', TimeSlot)
+        await dispatch("GetActiveTimeSlots")
+        await dispatch("GetDeactivatedTimeSlots")
     },
 
-    async AssignTeaching(Teacher, Course) {
-        await axios.post('http://localhost:8080/ServletController?action=assign-teaching', Teacher, Course)
+    async AssignTeaching(TeacherCourse) {
+        await axios.post('http://localhost:8080/ServletController?action=assign-teaching', TeacherCourse)
     },
 
-    async ActivateTeaching(Teacher, Course) {
-        await axios.post('http://localhost:8080/ServletController?action=activate-teaching', Teacher, Course)
+    async ActivateTeaching(TeacherCourse) {
+        await axios.post('http://localhost:8080/ServletController?action=activate-teaching', TeacherCourse)
     },
 
-    async DeactivateTeaching(Teacher, Course) {
-        await axios.post('http://localhost:8080/ServletController?action=deactivate-teaching', Teacher, Course)
+    async DeactivateTeaching(TeacherCourse) {
+        await axios.post('http://localhost:8080/ServletController?action=deactivate-teaching', TeacherCourse)
     },
 
-    async InsertBooking(User, Teacher, Course, TimeSlot) {
-        await axios.post('http://localhost:8080/ServletController?action=insert-booking', User, Teacher, Course, TimeSlot)
+    async InsertBooking(Booking) {
+        await axios.post('http://localhost:8080/ServletController?action=insert-booking', Booking)
     },
 
-    async DeleteBooking(User, Teacher, Course, TimeSlot) {
-        await axios.post('http://localhost:8080/ServletController?action=delete-booking', User, Teacher, Course, TimeSlot)
+    // TODO: Sistemare le chiamate alla lista delle prenotazioni
+    async DeleteBooking({
+        dispatch
+    }, Booking) {
+        await axios.post('http://localhost:8080/ServletController?action=delete-booking', Booking)
+        await dispatch("GetAllActiveBookings")
+        await dispatch("GetAllCompletedBookings")
+        await dispatch("GetAllDeletedBookings")
+        await dispatch("GetPersonalActiveBooking")
+        await dispatch("GetPersonalCompletedBooking")
+        await dispatch("GetPersonalDeletedBooking")
     },
 
-    async CompleteBooking(User, Teacher, Course, TimeSlot) {
-        await axios.post('http://localhost:8080/ServletController?action=complete-booking', User, Teacher, Course, TimeSlot)
+    async CompleteBooking({
+        dispatch
+    }, Booking) {
+        await axios.post('http://localhost:8080/ServletController?action=complete-booking', Booking)
+        await dispatch("GetAllActiveBookings")
+        await dispatch("GetAllCompletedBookings")
+        await dispatch("GetAllDeletedBookings")
+        await dispatch("GetPersonalActiveBooking")
+        await dispatch("GetPersonalCompletedBooking")
+        await dispatch("GetPersonalDeletedBooking")
     },
 
     // GET METHODS

@@ -21,6 +21,8 @@ import '@fortawesome/fontawesome-free/css/all.css'
 import VueCarousel from 'vue-carousel';
 import VueBootstrapToasts from "vue-bootstrap-toasts";
 
+
+
 // Make BootstrapVue available throughout your project
 Vue.use(BootstrapVue)
 // Optionally install the BootstrapVue icon components plugin
@@ -30,7 +32,6 @@ Vue.use(VueAxios, axios)
 
 Vue.use(VueCarousel)
 Vue.use(VueBootstrapToasts);
-
 
 Vue.config.productionTip = false
 axios.defaults.withCredentials = true

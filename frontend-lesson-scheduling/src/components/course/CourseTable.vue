@@ -89,7 +89,7 @@
 
       <!-- Main table element -->
       <b-table
-        :items="userList"
+        :items="courseList"
         :fields="fields"
         head-variant="light"
         :current-page="currentPage"
@@ -112,21 +112,21 @@
           <span v-if="active === 0">
             <b-button
               v-b-tooltip.hover
-              title="Rimuovi l'utente"
+              title="Rimuovi il corso"
               @click="removeRow(row.item)"
               variant="danger"
             >
-              <i class="fas fa-trash-alt"></i>
+              <i class="fas fa-trash-alt icon-deactivate"></i>
             </b-button>
           </span>
           <span v-if="active === 1">
             <b-button
               v-b-tooltip.hover
-              title="Attiva l'utente"
+              title="Attiva il corso"
               @click="addRow(row.item)"
               variant="success"
             >
-              <i class="fas fa-user-plus"> </i>
+              <i class="fas fa-user-plus icon-activate"> </i>
             </b-button>
           </span>
         </template>
@@ -149,13 +149,11 @@
 import { mapActions } from "vuex";
 
 export default {
-  props: ["userList", "active"],
+  props: ["courseList", "active"],
   data() {
     return {
       fields: [
-        { key: "name", label: "Nome", sortable: true, _rowVariant: "success" },
-        { key: "surname", label: "Cognome", sortable: true },
-        { key: "email", label: "E-mail", sortable: true },
+        { key: "title", label: "Titolo", sortable: true },
         { key: "actions", label: "" },
       ],
       totalRows: 1,
@@ -171,11 +169,11 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.userList.length;
+    this.totalRows = this.courseList.length;
   },
 
   beforeUpdate() {
-    this.totalRows = this.userList.length;
+    this.totalRows = this.courseList.length;
   },
 
   computed: {
@@ -188,9 +186,8 @@ export default {
         });
     },
   },
-
   methods: {
-    ...mapActions(["ActivateUser", "DeactivateUser"]),
+    ...mapActions(["ActivateCourse", "DeactivateCourse"]),
 
     makeToast(variant = null, title, content) {
       this.$bvToast.toast(content, {
@@ -201,41 +198,36 @@ export default {
     },
 
     async addRow(item) {
-      const User = {
-        userName: item.name,
-        userSurname: item.surname,
-        userEmail: item.email,
+      const Course = {
+        title: item.title,
       };
       try {
-        await this.ActivateUser(User);
+        await this.ActivateCourse(Course);
         this.makeToast(
           "success",
           "Operazione completata",
-          "L'utente è stato riattivato"
+          "Il corso è stato riattivato"
         );
       } catch (error) {
-        this.makeToast("danger", "Errore", "Impossibile riattivare l'utente");
+        this.makeToast("danger", "Errore", "Impossibile riattivare il corso");
       }
     },
 
     async removeRow(item) {
-      const User = {
-        userName: item.name,
-        userSurname: item.surname,
-        userEmail: item.email,
+      const Course = {
+        title: item.title,
       };
       try {
-        await this.DeactivateUser(User);
+        await this.DeactivateCourse(Course);
         this.makeToast(
           "success",
           "Operazione completata",
-          "L'utente è stato rimosso"
+          "Il corso è stato rimosso"
         );
       } catch (error) {
-        this.makeToast("danger", "Errore", "Impossibile rimuovere l'utente");
+        this.makeToast("danger", "Errore", "Impossibile rimuovere il corso");
       }
     },
-
     onFiltered(filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering
       this.totalRows = filteredItems.length;

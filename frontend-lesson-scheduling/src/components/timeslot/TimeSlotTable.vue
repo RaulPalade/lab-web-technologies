@@ -89,7 +89,7 @@
 
       <!-- Main table element -->
       <b-table
-        :items="userList"
+        :items="timeSlotList"
         :fields="fields"
         head-variant="light"
         :current-page="currentPage"
@@ -112,21 +112,21 @@
           <span v-if="active === 0">
             <b-button
               v-b-tooltip.hover
-              title="Rimuovi l'utente"
+              title="Rimuovi il time slot"
               @click="removeRow(row.item)"
               variant="danger"
             >
-              <i class="fas fa-trash-alt"></i>
+              <i class="fas fa-trash-alt icon-deactivate"></i>
             </b-button>
           </span>
           <span v-if="active === 1">
             <b-button
               v-b-tooltip.hover
-              title="Attiva l'utente"
+              title="Attiva il time slot"
               @click="addRow(row.item)"
               variant="success"
             >
-              <i class="fas fa-user-plus"> </i>
+              <i class="fas fa-user-plus icon-activate"> </i>
             </b-button>
           </span>
         </template>
@@ -149,13 +149,12 @@
 import { mapActions } from "vuex";
 
 export default {
-  props: ["userList", "active"],
+  props: ["timeSlotList", "active"],
   data() {
     return {
       fields: [
-        { key: "name", label: "Nome", sortable: true, _rowVariant: "success" },
-        { key: "surname", label: "Cognome", sortable: true },
-        { key: "email", label: "E-mail", sortable: true },
+        { key: "day", label: "Giorno", sortable: true },
+        { key: "hour", label: "Ora", sortable: true },
         { key: "actions", label: "" },
       ],
       totalRows: 1,
@@ -171,11 +170,11 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.userList.length;
+    this.totalRows = this.timeSlotList.length;
   },
 
   beforeUpdate() {
-    this.totalRows = this.userList.length;
+    this.totalRows = this.timeSlotList.length;
   },
 
   computed: {
@@ -188,9 +187,8 @@ export default {
         });
     },
   },
-
   methods: {
-    ...mapActions(["ActivateUser", "DeactivateUser"]),
+    ...mapActions(["ActivateTimeSlot", "DeactivateTimeSlot"]),
 
     makeToast(variant = null, title, content) {
       this.$bvToast.toast(content, {
@@ -201,41 +199,47 @@ export default {
     },
 
     async addRow(item) {
-      const User = {
-        userName: item.name,
-        userSurname: item.surname,
-        userEmail: item.email,
+      const TimeSlot = {
+        day: item.day,
+        hour: item.hour,
       };
       try {
-        await this.ActivateUser(User);
+        await this.ActivateTimeSlot(TimeSlot);
+        this.totalRows = this.timeSlotList.length;
         this.makeToast(
           "success",
           "Operazione completata",
-          "L'utente è stato riattivato"
+          "Il Time slot è stato riattivato"
         );
       } catch (error) {
-        this.makeToast("danger", "Errore", "Impossibile riattivare l'utente");
+        this.makeToast(
+          "danger",
+          "Errore",
+          "Impossibile riattivare il time slot"
+        );
       }
     },
 
     async removeRow(item) {
-      const User = {
-        userName: item.name,
-        userSurname: item.surname,
-        userEmail: item.email,
+      const TimeSlot = {
+        day: item.day,
+        hour: item.hour,
       };
       try {
-        await this.DeactivateUser(User);
+        await this.DeactivateTimeSlot(TimeSlot);
         this.makeToast(
           "success",
           "Operazione completata",
-          "L'utente è stato rimosso"
+          "Il Time slot è stato rimosso"
         );
       } catch (error) {
-        this.makeToast("danger", "Errore", "Impossibile rimuovere l'utente");
+        this.makeToast(
+          "danger",
+          "Errore",
+          "Impossibile rimuovere il time slot"
+        );
       }
     },
-
     onFiltered(filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering
       this.totalRows = filteredItems.length;

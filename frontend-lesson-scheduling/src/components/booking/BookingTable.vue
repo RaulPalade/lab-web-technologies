@@ -89,7 +89,7 @@
 
       <!-- Main table element -->
       <b-table
-        :items="userList"
+        :items="bookingList"
         :fields="fields"
         head-variant="light"
         :current-page="currentPage"
@@ -104,29 +104,38 @@
         @filtered="onFiltered"
         ref="table"
       >
-        <template #cell(cellName)="row">
-          {{ row.value.first }} {{ row.value.last }}
+        <template #cell(user)="row">
+          {{ row.value.name }} {{ row.value.surname }}
+        </template>
+
+        <template #cell(teacherCourse)="row">
+          {{ row.value.teacher.name }} {{ row.value.teacher.surname }}
+        </template>
+
+        <template #cell(timeSlot)="row">
+          {{ row.value.day }} ore {{ row.value.hour }}
         </template>
 
         <template #cell(actions)="row">
           <span v-if="active === 0">
             <b-button
               v-b-tooltip.hover
-              title="Rimuovi l'utente"
-              @click="removeRow(row.item)"
-              variant="danger"
+              title="Segna come completata"
+              @click="markCompleted(row.item)"
+              variant="success"
+              class="mr-1"
             >
-              <i class="fas fa-trash-alt"></i>
+              <i class="fas fa-check"></i>
             </b-button>
-          </span>
-          <span v-if="active === 1">
+
             <b-button
               v-b-tooltip.hover
-              title="Attiva l'utente"
-              @click="addRow(row.item)"
-              variant="success"
+              title="Cancella la prenotazione"
+              @click="markDeleted(row.item)"
+              variant="danger"
+              class="ml-1"
             >
-              <i class="fas fa-user-plus"> </i>
+              <i class="fas fa-trash-alt"></i>
             </b-button>
           </span>
         </template>
@@ -149,13 +158,14 @@
 import { mapActions } from "vuex";
 
 export default {
-  props: ["userList", "active"],
+  props: ["bookingList", "active"],
   data() {
     return {
       fields: [
-        { key: "name", label: "Nome", sortable: true, _rowVariant: "success" },
-        { key: "surname", label: "Cognome", sortable: true },
-        { key: "email", label: "E-mail", sortable: true },
+        { key: "user", label: "Studente", sortable: "true" },
+        { key: "teacherCourse", label: "Docente", sortable: "true" },
+        { key: "teacherCourse.course.title", label: "Corso", sortable: "true" },
+        { key: "timeSlot", label: "Data", sortable: "true" },
         { key: "actions", label: "" },
       ],
       totalRows: 1,
@@ -171,11 +181,11 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.userList.length;
+    this.totalRows = this.bookingList.length;
   },
 
   beforeUpdate() {
-    this.totalRows = this.userList.length;
+    this.totalRows = this.bookingList.length;
   },
 
   computed: {
@@ -190,7 +200,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(["ActivateUser", "DeactivateUser"]),
+    ...mapActions(["CompleteBooking", "DeleteBooking"]),
 
     makeToast(variant = null, title, content) {
       this.$bvToast.toast(content, {
@@ -200,39 +210,51 @@ export default {
       });
     },
 
-    async addRow(item) {
-      const User = {
-        userName: item.name,
-        userSurname: item.surname,
-        userEmail: item.email,
-      };
+    async markCompleted(item) {
+      const userEmail = item.user.email;
+      const day = item.timeSlot.day;
+      const hour = item.timeSlot.hour;
+      const teacherEmail = item.teacherCourse.teacher.email;
+      const title = item.teacherCourse.course.title;
+      const Booking = { userEmail, day, hour, teacherEmail, title };
+
       try {
-        await this.ActivateUser(User);
+        await this.CompleteBooking(Booking);
         this.makeToast(
           "success",
           "Operazione completata",
-          "L'utente è stato riattivato"
+          "La prenotazione è stata segnata come completata"
         );
       } catch (error) {
-        this.makeToast("danger", "Errore", "Impossibile riattivare l'utente");
+        this.makeToast(
+          "danger",
+          "Errore",
+          "Impossibile marcare la prenotazione come completata"
+        );
       }
     },
 
-    async removeRow(item) {
-      const User = {
-        userName: item.name,
-        userSurname: item.surname,
-        userEmail: item.email,
-      };
+    async markDeleted(item) {
+      const userEmail = item.user.email;
+      const day = item.timeSlot.day;
+      const hour = item.timeSlot.hour;
+      const teacherEmail = item.teacherCourse.teacher.email;
+      const title = item.teacherCourse.course.title;
+      const Booking = { userEmail, day, hour, teacherEmail, title };
+
       try {
-        await this.DeactivateUser(User);
+        await this.DeleteBooking(Booking);
         this.makeToast(
           "success",
           "Operazione completata",
-          "L'utente è stato rimosso"
+          "La prenotazione è stata cancellata"
         );
       } catch (error) {
-        this.makeToast("danger", "Errore", "Impossibile rimuovere l'utente");
+        this.makeToast(
+          "danger",
+          "Errore",
+          "Impossibile cancellare la prenotazione"
+        );
       }
     },
 

@@ -31,7 +31,7 @@ export default {
 // @import url("https://fonts.googleapis.com/css2?family=Lilita+One&display=swap");
 * {
   box-sizing: border-box;
-  background: #fff;
+  // background: #fff;
 }
 
 html,

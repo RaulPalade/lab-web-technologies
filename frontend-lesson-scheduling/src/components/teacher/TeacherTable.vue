@@ -89,7 +89,7 @@
 
       <!-- Main table element -->
       <b-table
-        :items="userList"
+        :items="teacherList"
         :fields="fields"
         head-variant="light"
         :current-page="currentPage"
@@ -112,7 +112,7 @@
           <span v-if="active === 0">
             <b-button
               v-b-tooltip.hover
-              title="Rimuovi l'utente"
+              title="Rimuovi il docente"
               @click="removeRow(row.item)"
               variant="danger"
             >
@@ -122,7 +122,7 @@
           <span v-if="active === 1">
             <b-button
               v-b-tooltip.hover
-              title="Attiva l'utente"
+              title="Attiva il docente"
               @click="addRow(row.item)"
               variant="success"
             >
@@ -149,11 +149,11 @@
 import { mapActions } from "vuex";
 
 export default {
-  props: ["userList", "active"],
+  props: ["teacherList", "active"],
   data() {
     return {
       fields: [
-        { key: "name", label: "Nome", sortable: true, _rowVariant: "success" },
+        { key: "name", label: "Nome", sortable: true },
         { key: "surname", label: "Cognome", sortable: true },
         { key: "email", label: "E-mail", sortable: true },
         { key: "actions", label: "" },
@@ -171,11 +171,11 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.userList.length;
+    this.totalRows = this.teacherList.length;
   },
 
   beforeUpdate() {
-    this.totalRows = this.userList.length;
+    this.totalRows = this.teacherList.length;
   },
 
   computed: {
@@ -190,7 +190,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(["ActivateUser", "DeactivateUser"]),
+    ...mapActions(["ActivateTeacher", "DeactivateTeacher"]),
 
     makeToast(variant = null, title, content) {
       this.$bvToast.toast(content, {
@@ -201,38 +201,38 @@ export default {
     },
 
     async addRow(item) {
-      const User = {
-        userName: item.name,
-        userSurname: item.surname,
-        userEmail: item.email,
+      const Teacher = {
+        teacherName: item.name,
+        teacherSurname: item.surname,
+        teacherEmail: item.email,
       };
       try {
-        await this.ActivateUser(User);
+        await this.ActivateTeacher(Teacher);
         this.makeToast(
           "success",
           "Operazione completata",
-          "L'utente è stato riattivato"
+          "Il docente è stato riattivato"
         );
       } catch (error) {
-        this.makeToast("danger", "Errore", "Impossibile riattivare l'utente");
+        this.makeToast("danger", "Errore", "Impossibile riattivare il docente");
       }
     },
 
     async removeRow(item) {
-      const User = {
-        userName: item.name,
-        userSurname: item.surname,
-        userEmail: item.email,
+      const Teacher = {
+        teacherName: item.name,
+        teacherSurname: item.surname,
+        teacherEmail: item.email,
       };
       try {
-        await this.DeactivateUser(User);
+        await this.DeactivateTeacher(Teacher);
         this.makeToast(
           "success",
           "Operazione completata",
-          "L'utente è stato rimosso"
+          "Il docente è stato rimosso"
         );
       } catch (error) {
-        this.makeToast("danger", "Errore", "Impossibile rimuovere l'utente");
+        this.makeToast("danger", "Errore", "Impossibile rimuovere il docente");
       }
     },
 

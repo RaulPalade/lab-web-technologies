@@ -86,11 +86,6 @@ public class ServletController extends HttpServlet {
                 System.out.println(userEmail);
                 password = jsonObject.get("password").getAsString();
                 System.out.println(password);
-
-                System.out.println("------");
-                System.out.println(userEmail);
-                System.out.println(password);
-
                 if ((userEmail != null && !userEmail.isBlank() && password != null && !password.isBlank()) && DAO.loginUser(new User(userEmail, password))) {
                     HttpSession session = request.getSession();
                     String jSessionId = session.getId();
@@ -199,9 +194,11 @@ public class ServletController extends HttpServlet {
 
             case "insert-teacher":
                 if (isLoggedAndAdmin(request)) {
-                    teacherName = request.getParameter("name");
-                    teacherSurname = request.getParameter("surname");
-                    teacherEmail = request.getParameter("email");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    teacherName = jsonObject.get("teacherName").getAsString();
+                    teacherSurname = jsonObject.get("teacherSurname").getAsString();
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
                     password = "password1";
 
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
@@ -224,9 +221,11 @@ public class ServletController extends HttpServlet {
 
             case "activate-teacher":
                 if (isLoggedAndAdmin(request)) {
-                    teacherName = request.getParameter("name");
-                    teacherSurname = request.getParameter("surname");
-                    teacherEmail = request.getParameter("email");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    teacherName = jsonObject.get("teacherName").getAsString();
+                    teacherSurname = jsonObject.get("teacherSurname").getAsString();
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
 
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
                         if (DAO.activateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail))) {
@@ -245,9 +244,11 @@ public class ServletController extends HttpServlet {
 
             case "deactivate-teacher":
                 if (isLoggedAndAdmin(request)) {
-                    teacherName = request.getParameter("name");
-                    teacherSurname = request.getParameter("surname");
-                    teacherEmail = request.getParameter("email");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    teacherName = jsonObject.get("teacherName").getAsString();
+                    teacherSurname = jsonObject.get("teacherSurname").getAsString();
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
 
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
                         if (DAO.deactivateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail))) {
@@ -265,8 +266,11 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "insert-course":
+
                 if (isLoggedAndAdmin(request)) {
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    title = jsonObject.get("title").getAsString();
 
                     if (title != null && !title.isBlank()) {
                         if (DAO.insertCourse(new Course(title))) {
@@ -286,7 +290,9 @@ public class ServletController extends HttpServlet {
 
             case "activate-course":
                 if (isLoggedAndAdmin(request)) {
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    title = jsonObject.get("title").getAsString();
 
                     if (title != null && !title.isBlank()) {
                         if (DAO.activateCourse(new Course(title))) {
@@ -305,7 +311,9 @@ public class ServletController extends HttpServlet {
 
             case "deactivate-course":
                 if (isLoggedAndAdmin(request)) {
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    title = jsonObject.get("title").getAsString();
 
                     if (title != null && !title.isBlank()) {
                         if (DAO.deactivateCourse(new Course(title))) {
@@ -324,8 +332,10 @@ public class ServletController extends HttpServlet {
 
             case "insert-time-slot":
                 if (isLoggedAndAdmin(request)) {
-                    day = request.getParameter("day");
-                    hour = Integer.parseInt(request.getParameter("hour"));
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
 
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.insertTimeSlot(new TimeSlot(day, hour))) {
@@ -345,8 +355,10 @@ public class ServletController extends HttpServlet {
 
             case "activate-time-slot":
                 if (isLoggedAndAdmin(request)) {
-                    day = request.getParameter("day");
-                    hour = Integer.parseInt(request.getParameter("hour"));
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
 
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.activateTimeSlot(new TimeSlot(day, hour))) {
@@ -365,14 +377,17 @@ public class ServletController extends HttpServlet {
 
             case "deactivate-time-slot":
                 if (isLoggedAndAdmin(request)) {
-                    day = request.getParameter("day");
-                    hour = Integer.parseInt(request.getParameter("hour"));
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
 
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.deactivateTimeSlot(new TimeSlot(day, hour))) {
                             System.out.println("TimeSlot deactivated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
+
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
@@ -385,8 +400,10 @@ public class ServletController extends HttpServlet {
 
             case "assign-teaching":
                 if (isLoggedAndAdmin(request)) {
-                    teacherEmail = request.getParameter("teacher-email");
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.assignTeaching(new Teacher(teacherEmail), new Course(title))) {
@@ -406,8 +423,10 @@ public class ServletController extends HttpServlet {
 
             case "activate-teaching":
                 if (isLoggedAndAdmin(request)) {
-                    teacherEmail = request.getParameter("teacher-email");
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.activateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
@@ -426,8 +445,10 @@ public class ServletController extends HttpServlet {
 
             case "deactivate-teaching":
                 if (isLoggedAndAdmin(request)) {
-                    teacherEmail = request.getParameter("teacher-email");
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.deactivateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
@@ -446,11 +467,13 @@ public class ServletController extends HttpServlet {
 
             case "insert-booking":
                 if (isLogged(request)) {
-                    userEmail = request.getParameter("user-email");
-                    day = request.getParameter("day");
-                    hour = Integer.parseInt(request.getParameter("hour"));
-                    teacherEmail = request.getParameter("teacher-email");
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    userEmail = jsonObject.get("userEmail").getAsString();
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
 
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.insertBooking(new User(userEmail), new TimeSlot(day, hour), new Teacher(teacherEmail), new Course(title))) {
@@ -470,11 +493,17 @@ public class ServletController extends HttpServlet {
 
             case "delete-booking":
                 if (isLogged(request)) {
-                    userEmail = request.getParameter("user-email");
-                    day = request.getParameter("day");
-                    hour = Integer.parseInt(request.getParameter("hour"));
-                    teacherEmail = request.getParameter("teacher-email");
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+
+                    System.out.println(jsonString);
+                    System.out.println(jsonObject);
+
+                    userEmail = jsonObject.get("userEmail").getAsString();
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
 
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
@@ -493,11 +522,13 @@ public class ServletController extends HttpServlet {
 
             case "complete-booking":
                 if (isLogged(request)) {
-                    userEmail = request.getParameter("user-email");
-                    day = request.getParameter("day");
-                    hour = Integer.parseInt(request.getParameter("hour"));
-                    teacherEmail = request.getParameter("teacher-email");
-                    title = request.getParameter("title");
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    userEmail = jsonObject.get("userEmail").getAsString();
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
 
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
@@ -524,6 +555,9 @@ public class ServletController extends HttpServlet {
         String action = request.getParameter("action");
         PrintWriter out = response.getWriter();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        String jsonString;
+        JsonObject jsonObject;
 
         switch (action) {
             case "list-active-users":
@@ -559,7 +593,10 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "list-teacher-availability":
-                String teacherEmail = request.getParameter("teacher-email");
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                String teacherEmail = jsonObject.get("teacherEmail").getAsString();
+
                 if (teacherEmail != null && !teacherEmail.isBlank()) {
                     ArrayList<TimeSlot> timeSlots = DAO.queryTeacherAvailability(new Teacher(teacherEmail));
                     out.println(gson.toJson(timeSlots));
@@ -570,7 +607,10 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "list-teacher-by-course":
-                String title = request.getParameter("title");
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                String title = jsonObject.get("title").getAsString();
+
                 if (title != null && !title.isBlank()) {
                     ArrayList<Teacher> teacherByCourse = DAO.viewTeacherByCourse(new Course(title));
                     out.println(gson.toJson(teacherByCourse));
@@ -593,6 +633,7 @@ public class ServletController extends HttpServlet {
                 out.flush();
                 break;
 
+            // TODO (1): Aggiungere metodo per query active teaching e deactivated teaching
             case "list-teacher-courses":
                 ArrayList<TeacherCourse> teacherCourses = DAO.queryTeacherCourse();
                 out.println(gson.toJson(teacherCourses));

@@ -1,10 +1,10 @@
 <template>
   <div class="user-list">
     <b-tabs content-class="mt-3" v-model="tabActive" @changed="onTabChanged">
-      <b-tab title="Utenti attivi">
+      <b-tab title="Utenti attivi" :title-link-class="linkClass(0)">
         <UserTable :userList="ActiveUserList" :active="tabActive" />
       </b-tab>
-      <b-tab title="Utenti rimossi">
+      <b-tab title="Utenti rimossi" :title-link-class="linkClass(1)">
         <UserTable :userList="DeactivatedUserList" :active="tabActive" />
       </b-tab>
     </b-tabs>
@@ -37,11 +37,26 @@ export default {
       this.tabActive = this.tabs.length - 1;
     },
 
-    onUpdate() {
-      this.$refs.table.refresh();
+    linkClass(idx) {
+      if (this.tabActive === idx) {
+        return "active-tab";
+      } else {
+        return "not-active-tab";
+      }
     },
   },
 };
 </script>
 
-<style></style>
+<style>
+.active-tab {
+  background: #017d91 !important;
+  border-color: #017d91 !important;
+  color: #fff !important;
+}
+
+.not-active-tab {
+  background: rgb(1, 125, 145, 0.1) !important;
+  color: #000;
+}
+</style>
