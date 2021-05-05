@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import store from "../store";
 import Home from "../views/Home.vue";
+import UserDashboard from "../views/UserDashboard.vue";
 import AdminDashboard from "../views/AdminDashboard.vue";
 import About from "../views/About.vue"
 import Login from "../views/Login";
@@ -19,6 +20,24 @@ const routes = [{
     component: AdminDashboard,
     async beforeEnter(to, from, next) {
       if (store.getters.isAuthenticated && store.getters.isAdmin) {
+        next();
+      } else if (store.getters.isAuthenticated && !store.getters.isAdmin) {
+        next({
+          name: "UserDashboard"
+        })
+      } else {
+        next({
+          name: "Home"
+        })
+      }
+    }
+  },
+  {
+    path: "/userDashboard",
+    name: "UserDashboard",
+    component: UserDashboard,
+    async beforeEnter(to, from, next) {
+      if (store.getters.isAuthenticated && !store.getters.isAdmin) {
         next();
       } else {
         next({

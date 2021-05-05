@@ -2,10 +2,18 @@
   <div class="time-slot-list">
     <b-tabs content-class="mt-3" v-model="tabActive" @changed="onTabChanged">
       <b-tab title="Corsi attivi" :title-link-class="linkClass(0)">
-        <CourseTable :courseList="ActiveCourseList" :active="tabActive" />
+        <CourseTable
+          :courseList="ActiveCourseList"
+          :active="tabActive"
+          :isAdmin="isAdmin"
+        />
       </b-tab>
       <b-tab title="Corsi rimossi" :title-link-class="linkClass(1)">
-        <CourseTable :courseList="DeactivatedCourseList" :active="tabActive" />
+        <CourseTable
+          :courseList="DeactivatedCourseList"
+          :active="tabActive"
+          :isAdmin="isAdmin"
+        />
       </b-tab>
     </b-tabs>
   </div>
@@ -30,6 +38,10 @@ export default {
       ActiveCourseList: "StateActiveCourses",
       DeactivatedCourseList: "StateDeactivatedCourses",
     }),
+
+    isAdmin: function() {
+      return this.$store.getters.isAdmin;
+    },
   },
   methods: {
     ...mapActions(["GetActiveCourses", "GetDeactivatedCourses"]),

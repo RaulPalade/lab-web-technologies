@@ -37,7 +37,7 @@ export default {
   data() {
     return {
       form: {
-        email: "paolo.rossi@edu.unito.it",
+        email: "francesco.rossi@edu.unito.it",
         password: "password1",
       },
       showError: false,

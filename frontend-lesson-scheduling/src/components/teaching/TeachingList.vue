@@ -30,13 +30,15 @@
         <b-row cols="2" align-v="start">
           <b-col v-for="teacher in activeTeachers" :key="teacher.id">
             <b-card :title="teacher.text" class="m-2">
-              <b-button
-                v-b-tooltip.hover
-                title="Rimuovi il corso"
-                @click="removeAssignment(teacher.value)"
-                variant="danger"
-                >Rimuovi
-              </b-button>
+              <span v-if="isAdmin">
+                <b-button
+                  v-b-tooltip.hover
+                  title="Rimuovi il corso"
+                  @click="removeAssignment(teacher.value)"
+                  variant="danger"
+                  >Rimuovi
+                </b-button>
+              </span>
             </b-card>
           </b-col>
         </b-row>
@@ -66,13 +68,15 @@
         <b-row cols="2" align-v="start">
           <b-col v-for="teacher in deactivatedTeachers" :key="teacher.id">
             <b-card :title="teacher.text" class="m-2">
-              <b-button
-                v-b-tooltip.hover
-                title="Rimuovi il corso"
-                @click="insertAssignment(teacher.value)"
-                variant="success"
-                >Attiva
-              </b-button>
+              <span v-if="isAdmin">
+                <b-button
+                  v-b-tooltip.hover
+                  title="Rimuovi il corso"
+                  @click="insertAssignment(teacher.value)"
+                  variant="success"
+                  >Attiva
+                </b-button></span
+              >
             </b-card>
           </b-col>
         </b-row>
@@ -101,6 +105,10 @@ export default {
       FilteredActiveTeacherList: "StateActiveTeacherByCourse",
       FilteredDeactivatedTeacherList: "StateDeactivatedTeacherByCourse",
     }),
+
+    isAdmin: function() {
+      return this.$store.getters.isAdmin;
+    },
 
     courses() {
       return this.ActiveCourseList.map((course) => ({

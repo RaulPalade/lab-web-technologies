@@ -17,7 +17,7 @@
             </span>
             <span v-else>
               <router-link
-                to="/dashboard"
+                to="/UserDashboard"
                 class="navbar-item nav-link nav-link-ltr"
                 >Dashboard</router-link
               >

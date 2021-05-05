@@ -2,12 +2,17 @@
   <div class="teacher-list">
     <b-tabs content-class="mt-3" v-model="tabActive" @changed="onTabChanged">
       <b-tab title="Docenti attivi" :title-link-class="linkClass(0)">
-        <TeacherTable :teacherList="ActiveTeacherList" :active="tabActive" />
+        <TeacherTable
+          :teacherList="ActiveTeacherList"
+          :active="tabActive"
+          :isAdmin="isAdmin"
+        />
       </b-tab>
       <b-tab title="Docenti rimossi" :title-link-class="linkClass(1)">
         <TeacherTable
           :teacherList="DeactivatedTeacherList"
           :active="tabActive"
+          :isAdmin="isAdmin"
         />
       </b-tab>
     </b-tabs>
@@ -33,6 +38,10 @@ export default {
       ActiveTeacherList: "StateActiveTeachers",
       DeactivatedTeacherList: "StateDeactivatedTeachers",
     }),
+
+    isAdmin: function() {
+      return this.$store.getters.isAdmin;
+    },
   },
   methods: {
     ...mapActions([

@@ -110,7 +110,7 @@
         </template>
 
         <template #cell(actions)="row">
-          <span v-if="active === 0">
+          <span v-if="active === 0 && isAdmin">
             <b-button
               v-b-tooltip.hover
               title="Rimuovi il corso"
@@ -120,7 +120,7 @@
               <i class="fas fa-trash-alt icon-deactivate"></i>
             </b-button>
           </span>
-          <span v-if="active === 1">
+          <span v-if="active === 1 && isAdmin">
             <b-button
               v-b-tooltip.hover
               title="Attiva il corso"
@@ -150,7 +150,7 @@
 import { mapActions } from "vuex";
 
 export default {
-  props: ["courseList", "active"],
+  props: ["courseList", "active", "isAdmin"],
   data() {
     return {
       fields: [

@@ -2,12 +2,17 @@
   <div class="time-slot-list">
     <b-tabs content-class="mt-3" v-model="tabActive" @changed="onTabChanged">
       <b-tab title="Slot orari attivi" :title-link-class="linkClass(0)">
-        <TimeSlotTable :timeSlotList="ActiveTimeSlotList" :active="tabActive" />
+        <TimeSlotTable
+          :timeSlotList="ActiveTimeSlotList"
+          :active="tabActive"
+          :isAdmin="isAdmin"
+        />
       </b-tab>
       <b-tab title="Slot orari rimossi" :title-link-class="linkClass(1)">
         <TimeSlotTable
           :timeSlotList="DeactivatedTimeSlotList"
           :active="tabActive"
+          :isAdmin="isAdmin"
         />
       </b-tab>
     </b-tabs>
@@ -33,6 +38,10 @@ export default {
       ActiveTimeSlotList: "StateActiveTimeSlots",
       DeactivatedTimeSlotList: "StateDeactivatedTimeSlots",
     }),
+
+    isAdmin: function() {
+      return this.$store.getters.isAdmin;
+    },
   },
   methods: {
     ...mapActions(["GetActiveTimeSlots", "GetDeactivatedTimeSlots"]),
