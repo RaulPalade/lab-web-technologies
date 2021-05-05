@@ -91,6 +91,7 @@
       <b-table
         :items="userList"
         :fields="fields"
+        empty-text="Non ci sono utenti da mostrare"
         head-variant="light"
         :current-page="currentPage"
         :per-page="perPage"

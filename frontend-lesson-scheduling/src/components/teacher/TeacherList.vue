@@ -35,7 +35,12 @@ export default {
     }),
   },
   methods: {
-    ...mapActions(["GetActiveTeachers", "GetDeactivatedTeachers"]),
+    ...mapActions([
+      "GetActiveTeachers",
+      "GetDeactivatedTeachers",
+      "AssignTeaching",
+    ]),
+
     onTabChanged() {
       this.tabActive = this.tabs.length - 1;
     },
@@ -45,6 +50,30 @@ export default {
         return "active-tab";
       } else {
         return "not-active-tab";
+      }
+    },
+
+    async onSubmit(event) {
+      event.preventDefault();
+
+      const newTimeSlot = {
+        day: this.form.day,
+        hour: this.form.hour,
+      };
+
+      try {
+        await this.InsertTimeSlot(newTimeSlot);
+        this.makeToast(
+          "success",
+          "Operazione completata",
+          "Il nuovo slot orario è stato registrato correttamente"
+        );
+      } catch {
+        this.makeToast(
+          "danger",
+          "Operazione completata",
+          "Impossibile registrare il nuovo slot orario al momento"
+        );
       }
     },
   },

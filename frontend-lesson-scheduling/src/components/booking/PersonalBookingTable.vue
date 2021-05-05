@@ -105,10 +105,6 @@
         @filtered="onFiltered"
         ref="table"
       >
-        <template #cell(user)="row">
-          {{ row.value.name }} {{ row.value.surname }}
-        </template>
-
         <template #cell(teacherCourse)="row">
           {{ row.value.teacher.name }} {{ row.value.teacher.surname }}
         </template>
@@ -163,7 +159,6 @@ export default {
   data() {
     return {
       fields: [
-        { key: "user", label: "Studente", sortable: "true" },
         { key: "teacherCourse", label: "Docente", sortable: "true" },
         { key: "teacherCourse.course.title", label: "Corso", sortable: "true" },
         { key: "timeSlot", label: "Data", sortable: "true" },
@@ -212,12 +207,11 @@ export default {
     },
 
     async markCompleted(item) {
-      const userEmail = item.user.email;
       const day = item.timeSlot.day;
       const hour = item.timeSlot.hour;
       const teacherEmail = item.teacherCourse.teacher.email;
       const title = item.teacherCourse.course.title;
-      const Booking = { userEmail, day, hour, teacherEmail, title };
+      const Booking = { day, hour, teacherEmail, title };
 
       try {
         await this.CompleteBooking(Booking);
@@ -236,12 +230,11 @@ export default {
     },
 
     async markDeleted(item) {
-      const userEmail = item.user.email;
       const day = item.timeSlot.day;
       const hour = item.timeSlot.hour;
       const teacherEmail = item.teacherCourse.teacher.email;
       const title = item.teacherCourse.course.title;
-      const Booking = { userEmail, day, hour, teacherEmail, title };
+      const Booking = { day, hour, teacherEmail, title };
 
       try {
         await this.DeleteBooking(Booking);

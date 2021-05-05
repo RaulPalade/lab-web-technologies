@@ -91,6 +91,7 @@
       <b-table
         :items="timeSlotList"
         :fields="fields"
+        empty-text="Non ci sono slot orari da mostrare"
         head-variant="light"
         :current-page="currentPage"
         :per-page="perPage"
@@ -209,13 +210,13 @@ export default {
         this.makeToast(
           "success",
           "Operazione completata",
-          "Il Time slot è stato riattivato"
+          "Lo slot orario è stato riattivato"
         );
       } catch (error) {
         this.makeToast(
           "danger",
           "Errore",
-          "Impossibile riattivare il time slot"
+          "Impossibile riattivare lo slot orario"
         );
       }
     },
@@ -230,13 +231,13 @@ export default {
         this.makeToast(
           "success",
           "Operazione completata",
-          "Il Time slot è stato rimosso"
+          "Lo slot orario è stato rimosso"
         );
       } catch (error) {
         this.makeToast(
           "danger",
           "Errore",
-          "Impossibile rimuovere il time slot"
+          "Impossibile rimuovere lo slot orario"
         );
       }
     },

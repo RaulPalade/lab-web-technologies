@@ -284,18 +284,17 @@ public class DAO {
                     "where Active = ?\n" +
                     "  and (Day, Hour) not in\n" +
                     "      (select Day, Hour\n" +
-                    "       from teacher\n" +
-                    "                join booking b on teacher.IdTeacher = b.IdTeacher\n" +
-                    "                join time_slot ts on b.IdTimeSlot = ts.IdTimeSlot\n" +
-                    "       where teacher.Email = ?\n" +
-                    "         and teacher.Active = ?\n" +
-                    "         and Deleted = ?\n" +
-                    "         and Completed = ?);");
+                    "       from booking\n" +
+                    "                join time_slot ts on booking.IdTimeSlot = ts.IdTimeSlot\n" +
+                    "                join teacher_course tc on tc.IdTeacher = booking.IdTeacher and tc.IdCourse = booking.IdCourse\n" +
+                    "                join teacher t on tc.IdTeacher = t.IdTeacher\n" +
+                    "       where booking.Completed = ?\n" +
+                    "         and booking.Deleted = ?\n" +
+                    "         and t.Email = ?);");
             statement.setBoolean(1, true);
-            statement.setString(2, teacher.getEmail());
-            statement.setBoolean(3, true);
-            statement.setBoolean(4, false);
-            statement.setBoolean(5, false);
+            statement.setBoolean(2, false);
+            statement.setBoolean(3, false);
+            statement.setString(4, teacher.getEmail());
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 TimeSlot timeSlot = new TimeSlot(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3));
@@ -803,7 +802,7 @@ public class DAO {
         return rowAffected != 0;
     }
 
-    public static ArrayList<Teacher> viewTeacherByCourse(Course course) {
+    private static ArrayList<Teacher> viewTeacherByCourse(Course course, boolean active) {
         if (course == null) {
             return new ArrayList<>();
         }
@@ -814,13 +813,14 @@ public class DAO {
 
         try {
             connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select Name, Surname, Title\n" +
+            PreparedStatement statement = connection.prepareStatement("select Name, Surname, Email\n" +
                     "from teacher join teacher_course tc on teacher.IdTeacher = tc.IdTeacher join course c on c.IdCourse = tc.IdCourse\n" +
-                    "where c.IdCourse = ?;");
-            statement.setInt(1, idCourse);
+                    "where tc.Active = ? and c.IdCourse = ?;");
+            statement.setBoolean(1, active);
+            statement.setInt(2, idCourse);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Teacher teacher = new Teacher(resultSet.getString("Name"), resultSet.getString("Surname"));
+                Teacher teacher = new Teacher(resultSet.getString("Name"), resultSet.getString("Surname"), resultSet.getString("email"));
                 teachers.add(teacher);
             }
         } catch (SQLException e) {
@@ -836,6 +836,93 @@ public class DAO {
         }
 
         return teachers;
+    }
+
+    public static ArrayList<Teacher> viewActiveTeacherByCourse(Course course) {
+        return viewTeacherByCourse(course, true);
+    }
+
+    public static ArrayList<Teacher> viewDeactivatedTeacherByCourse(Course course) {
+        return viewTeacherByCourse(course, false);
+    }
+
+    public static ArrayList<Course> viewCourseByTeacher(Teacher teacher) {
+        if (teacher == null) {
+            return new ArrayList<>();
+        }
+
+        Connection connection = null;
+        int idTeacher = getIdTeacher(teacher.getEmail());
+        ArrayList<Course> courses = new ArrayList<>();
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("select Title\n" +
+                    "from course\n" +
+                    "         join teacher_course tc on course.IdCourse = tc.IdCourse\n" +
+                    "         join teacher t on tc.IdTeacher = t.IdTeacher\n" +
+                    "where tc.Active = ? and t.IdTeacher = ?;");
+            statement.setBoolean(1, true);
+            statement.setInt(2, idTeacher);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Course course = new Course(resultSet.getString("Title"));
+                courses.add(course);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return courses;
+    }
+
+    public static ArrayList<Course> viewCourseNotTaughtByTeacher(Teacher teacher) {
+        if (teacher == null) {
+            return new ArrayList<>();
+        }
+
+        Connection connection = null;
+        int idTeacher = getIdTeacher(teacher.getEmail());
+        ArrayList<Course> courses = new ArrayList<>();
+
+        try {
+            connection = DAO.connect();
+            PreparedStatement statement = connection.prepareStatement("select Title\n" +
+                    "from course\n" +
+                    "where Title not in (select Title\n" +
+                    "                       from course\n" +
+                    "                                join teacher_course tc on course.IdCourse = tc.IdCourse\n" +
+                    "                                join teacher t on tc.IdTeacher = t.IdTeacher\n" +
+                    "                       where tc.Active = ?\n" +
+                    "                         and t.IdTeacher = ?);");
+            statement.setBoolean(1, true);
+            statement.setInt(2, idTeacher);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Course course = new Course(resultSet.getString("Title"));
+                courses.add(course);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return courses;
     }
 
     public static ArrayList<Booking> queryAllBookings() {

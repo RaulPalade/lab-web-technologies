@@ -19,7 +19,10 @@ const state = {
     personalActiveBookings: null,
     personalCompletedBookings: null,
     personalDeletedBookings: null,
-    teacherByCourse: null,
+    activeTeacherByCourse: null,
+    deactivatedTeacherByCourse: null,
+    courseByTeacher: null,
+    courseNotTaughtByTeacher: null,
     activeTimeSlots: null,
     deactivatedTimeSlots: null
 }
@@ -41,10 +44,13 @@ const getters = {
     StateAllCompletedBookings: state => state.allCompletedBookings,
     StateAllDeletedBookings: state => state.allDeletedBookings,
     StatePersonalBookings: state => state.personalBookings,
-    StateActiveBookings: state => state.personalActiveBookings,
-    StateCompletedBookings: state => state.personalCompletedBookings,
-    StateDeletedBookings: state => state.personalDeletedBookings,
-    StateTeacherByCourse: state => state.teacherByCourse,
+    StatePersonalActiveBookings: state => state.personalActiveBookings,
+    StatePersonalCompletedBookings: state => state.personalCompletedBookings,
+    StatePersonalDeletedBookings: state => state.personalDeletedBookings,
+    StateActiveTeacherByCourse: state => state.activeTeacherByCourse,
+    StateDeactivatedTeacherByCourse: state => state.deactivatedTeacherByCourse,
+    StateCourseByTeacher: state => state.courseByTeacher,
+    StateCourseNotTaughtByTeacher: state => state.courseNotTaughtByTeacher,
     StateActiveTimeSlots: state => state.activeTimeSlots,
     StateDeactivatedTimeSlots: state => state.deactivatedTimeSlots
 }
@@ -70,15 +76,17 @@ const actions = {
         await commit('logoutUser', user)
     },
 
-    async InsertUser(newUser) {
+    async InsertUser({
+        dispatch
+    }, newUser) {
         await axios.post('http://localhost:8080/ServletController?action=insert-user', newUser)
+        await dispatch("GetActiveUsers")
     },
 
     async ActivateUser({
         dispatch
     }, User) {
-        let response = await axios.post('http://localhost:8080/ServletController?action=activate-user', User)
-        console.log(response)
+        await axios.post('http://localhost:8080/ServletController?action=activate-user', User)
         await dispatch("GetActiveUsers")
         await dispatch("GetDeactivatedUsers")
     },
@@ -91,8 +99,11 @@ const actions = {
         await dispatch("GetDeactivatedUsers")
     },
 
-    async InsertTeacher(newTeacher) {
+    async InsertTeacher({
+        dispatch
+    }, newTeacher) {
         await axios.post('http://localhost:8080/ServletController?action=insert-teacher', newTeacher)
+        await dispatch("GetActiveTeachers")
     },
 
     async ActivateTeacher({
@@ -111,8 +122,11 @@ const actions = {
         await dispatch("GetDeactivatedTeachers")
     },
 
-    async InsertCourse(newCourse) {
+    async InsertCourse({
+        dispatch
+    }, newCourse) {
         await axios.post('http://localhost:8080/ServletController?action=insert-course', newCourse)
+        await dispatch("GetActiveCourses")
     },
 
     async ActivateCourse({
@@ -131,14 +145,16 @@ const actions = {
         await dispatch("GetDeactivatedCourses")
     },
 
-    async InsertTimeSlot(newTimeSlot) {
+    async InsertTimeSlot({
+        dispatch
+    }, newTimeSlot) {
         await axios.post('http://localhost:8080/ServletController?action=insert-time-slot', newTimeSlot)
+        await dispatch("GetActiveTimeSlots")
     },
 
     async ActivateTimeSlot({
         dispatch
     }, TimeSlot) {
-        console.log(TimeSlot)
         await axios.post('http://localhost:8080/ServletController?action=activate-time-slot', TimeSlot)
         await dispatch("GetActiveTimeSlots")
         await dispatch("GetDeactivatedTimeSlots")
@@ -147,26 +163,49 @@ const actions = {
     async DeactivateTimeSlot({
         dispatch
     }, TimeSlot) {
-        console.log(TimeSlot)
         await axios.post('http://localhost:8080/ServletController?action=deactivate-time-slot', TimeSlot)
         await dispatch("GetActiveTimeSlots")
         await dispatch("GetDeactivatedTimeSlots")
     },
 
-    async AssignTeaching(TeacherCourse) {
+    async AssignTeaching({
+        dispatch
+    }, TeacherCourse) {
+        const Teacher = {
+            teacherEmail: TeacherCourse.teacherEmail
+        }
         await axios.post('http://localhost:8080/ServletController?action=assign-teaching', TeacherCourse)
+        await dispatch("GetActiveTeachers")
+        await dispatch("GetCourseNotTaughtByTeacher", Teacher)
     },
 
-    async ActivateTeaching(TeacherCourse) {
+    async ActivateTeaching({
+        dispatch
+    }, TeacherCourse) {
+        const Course = {
+            title: TeacherCourse.title
+        }
         await axios.post('http://localhost:8080/ServletController?action=activate-teaching', TeacherCourse)
+        await dispatch('GetDeactivatedTeacherByCourse', Course)
+        await dispatch('GetActiveTeacherByCourse', Course)
     },
 
-    async DeactivateTeaching(TeacherCourse) {
+    async DeactivateTeaching({
+        dispatch
+    }, TeacherCourse) {
+        const Course = {
+            title: TeacherCourse.title
+        }
         await axios.post('http://localhost:8080/ServletController?action=deactivate-teaching', TeacherCourse)
+        await dispatch('GetActiveTeacherByCourse', Course)
+        await dispatch('GetDeactivatedTeacherByCourse', Course)
     },
 
-    async InsertBooking(Booking) {
+    async InsertBooking({
+        dispatch
+    }, Booking) {
         await axios.post('http://localhost:8080/ServletController?action=insert-booking', Booking)
+        await dispatch("GetAllActiveBookings")
     },
 
     // TODO: Sistemare le chiamate alla lista delle prenotazioni
@@ -192,6 +231,41 @@ const actions = {
         await dispatch("GetPersonalActiveBooking")
         await dispatch("GetPersonalCompletedBooking")
         await dispatch("GetPersonalDeletedBooking")
+    },
+
+    async GetActiveTeacherByCourse({
+        commit
+    }, Course) {
+        let activeTeacherByCourse = await axios.post('http://localhost:8080/ServletController?action=list-active-teacher-by-course', Course)
+        await commit('setActiveTeacherByCourse', activeTeacherByCourse.data)
+    },
+
+    async GetDeactivatedTeacherByCourse({
+        commit
+    }, Course) {
+        let deactivatedTeacherByCourse = await axios.post('http://localhost:8080/ServletController?action=list-deactivated-teacher-by-course', Course)
+        await commit('setDeactivatedTeacherByCourse', deactivatedTeacherByCourse.data)
+    },
+
+    async GetCourseByTeacher({
+        commit
+    }, Teacher) {
+        let courseByTeacher = await axios.post("http://localhost:8080/ServletController?action=list-course-by-teacher", Teacher);
+        await commit("setCourseByTeacher", courseByTeacher.data)
+    },
+
+    async GetCourseNotTaughtByTeacher({
+        commit
+    }, Teacher) {
+        let courseNotTaughtByTeacher = await axios.post("http://localhost:8080/ServletController?action=list-course-not-taught-by-teacher", Teacher);
+        await commit("setCourseNotTaughtByTeacher", courseNotTaughtByTeacher.data)
+    },
+
+    async GetTeacherAvailability({
+        commit
+    }, Teacher) {
+        let teacherAvailabilities = await axios.post('http://localhost:8080/ServletController?action=list-teacher-availability', Teacher)
+        await commit('setTeacherAvailabilities', teacherAvailabilities.data)
     },
 
     // GET METHODS
@@ -221,13 +295,6 @@ const actions = {
     }) {
         let deactivatedTeachers = await axios.get('http://localhost:8080/ServletController?action=list-deactivated-teachers')
         await commit('setDeactivatedTeachers', deactivatedTeachers.data)
-    },
-
-    async GetTeacherAvailability({
-        commit
-    }, Teacher) {
-        let teacherAvailabilities = await axios.get('http://localhost:8080/ServletController?action=list-teachers-availability', Teacher)
-        await commit('setTeacherAvailabilities', teacherAvailabilities.data)
     },
 
     async GetActiveCourses({
@@ -305,13 +372,6 @@ const actions = {
     }, User) {
         let personalDeletedBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-deleted-bookings', User)
         await commit('setPersonalDeletedBookings', personalDeletedBookings.data)
-    },
-
-    async GetTeacherByCourse({
-        commit
-    }, Course) {
-        let teacherByCourse = await axios.get('http://localhost:8080/ServletController?action=list-teacher-by-course', Course)
-        await commit('setTeacherByCourse', teacherByCourse.data)
     },
 
     async GetActiveTimeSlots({
@@ -406,8 +466,20 @@ const mutations = {
         state.personalDeletedBookings = personalDeletedBookings
     },
 
-    setTeacherByCourse(state, teacherByCourse) {
-        state.teacherByCourse = teacherByCourse
+    setActiveTeacherByCourse(state, activeTeacherByCourse) {
+        state.activeTeacherByCourse = activeTeacherByCourse
+    },
+
+    setDeactivatedTeacherByCourse(state, deactivatedTeacherByCourse) {
+        state.deactivatedTeacherByCourse = deactivatedTeacherByCourse
+    },
+
+    setCourseByTeacher(state, courseByTeacher) {
+        state.courseByTeacher = courseByTeacher
+    },
+
+    setCourseNotTaughtByTeacher(state, courseNotTaughtByTeacher) {
+        state.courseNotTaughtByTeacher = courseNotTaughtByTeacher
     },
 
     setActiveTimeSlots(state, activeTimeSlots) {

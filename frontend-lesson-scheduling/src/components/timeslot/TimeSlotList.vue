@@ -1,10 +1,10 @@
 <template>
   <div class="time-slot-list">
     <b-tabs content-class="mt-3" v-model="tabActive" @changed="onTabChanged">
-      <b-tab title="Time Slot attivi" :title-link-class="linkClass(0)">
+      <b-tab title="Slot orari attivi" :title-link-class="linkClass(0)">
         <TimeSlotTable :timeSlotList="ActiveTimeSlotList" :active="tabActive" />
       </b-tab>
-      <b-tab title="Time Slot rimossi" :title-link-class="linkClass(1)">
+      <b-tab title="Slot orari rimossi" :title-link-class="linkClass(1)">
         <TimeSlotTable
           :timeSlotList="DeactivatedTimeSlotList"
           :active="tabActive"

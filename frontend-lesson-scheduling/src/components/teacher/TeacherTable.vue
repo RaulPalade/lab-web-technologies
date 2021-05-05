@@ -91,6 +91,7 @@
       <b-table
         :items="teacherList"
         :fields="fields"
+        empty-text="Non ci sono docenti da mostrare"
         head-variant="light"
         :current-page="currentPage"
         :per-page="perPage"

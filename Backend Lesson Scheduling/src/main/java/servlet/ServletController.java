@@ -41,6 +41,7 @@ public class ServletController extends HttpServlet {
         }
     }
 
+    // TODO (2): Controllare che il JSON non sia vuoto altrimenti la servlet risponderà con codice
     private String readJSONRequest(HttpServletRequest request) throws IOException {
         StringBuilder buffer = new StringBuilder();
         BufferedReader reader = request.getReader();
@@ -57,6 +58,8 @@ public class ServletController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         String userName;
         String userSurname;
@@ -95,7 +98,6 @@ public class ServletController extends HttpServlet {
                     Cookie userCookie = new Cookie("userCookie", userEmail);
                     userCookie.setMaxAge(30 * 60);
                     response.addCookie(userCookie);
-                    PrintWriter out = response.getWriter();
                     out.println(isAdmin);
                     System.out.println("Login Success with jSessionID: " + jSessionId);
                 } else {
@@ -469,7 +471,8 @@ public class ServletController extends HttpServlet {
                 if (isLogged(request)) {
                     jsonString = readJSONRequest(request);
                     jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                    userEmail = jsonObject.get("userEmail").getAsString();
+                    userEmail = request.getSession().getAttribute("emailUser").toString();
+                    System.out.println(userEmail);
                     day = jsonObject.get("day").getAsString();
                     hour = Integer.parseInt(jsonObject.get("hour").getAsString());
                     teacherEmail = jsonObject.get("teacherEmail").getAsString();
@@ -495,11 +498,11 @@ public class ServletController extends HttpServlet {
                 if (isLogged(request)) {
                     jsonString = readJSONRequest(request);
                     jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-
-                    System.out.println(jsonString);
-                    System.out.println(jsonObject);
-
-                    userEmail = jsonObject.get("userEmail").getAsString();
+                    if (jsonObject.has("userEmail")) {
+                        userEmail = jsonObject.get("userEmail").getAsString();
+                    } else {
+                        userEmail = request.getSession().getAttribute("emailUser").toString();
+                    }
                     day = jsonObject.get("day").getAsString();
                     hour = Integer.parseInt(jsonObject.get("hour").getAsString());
                     teacherEmail = jsonObject.get("teacherEmail").getAsString();
@@ -524,7 +527,11 @@ public class ServletController extends HttpServlet {
                 if (isLogged(request)) {
                     jsonString = readJSONRequest(request);
                     jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                    userEmail = jsonObject.get("userEmail").getAsString();
+                    if (jsonObject.has("userEmail")) {
+                        userEmail = jsonObject.get("userEmail").getAsString();
+                    } else {
+                        userEmail = request.getSession().getAttribute("emailUser").toString();
+                    }
                     day = jsonObject.get("day").getAsString();
                     hour = Integer.parseInt(jsonObject.get("hour").getAsString());
                     teacherEmail = jsonObject.get("teacherEmail").getAsString();
@@ -543,11 +550,87 @@ public class ServletController extends HttpServlet {
                 }
                 break;
 
+            case "list-active-teacher-by-course":
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                title = jsonObject.get("title").getAsString();
+
+                if (title != null && !title.isBlank()) {
+                    ArrayList<Teacher> teacherByCourse = DAO.viewActiveTeacherByCourse(new Course(title));
+                    out.println(gson.toJson(teacherByCourse));
+                    out.flush();
+                } else {
+                    System.out.println("Null title parameter");
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                }
+                break;
+
+            case "list-deactivated-teacher-by-course":
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                title = jsonObject.get("title").getAsString();
+
+                if (title != null && !title.isBlank()) {
+                    ArrayList<Teacher> teacherByCourse = DAO.viewDeactivatedTeacherByCourse(new Course(title));
+                    out.println(gson.toJson(teacherByCourse));
+                    out.flush();
+                } else {
+                    System.out.println("Null title parameter");
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                }
+                break;
+
+            case "list-course-by-teacher":
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                teacherEmail = jsonObject.get("teacherEmail").getAsString();
+
+                if (teacherEmail != null && !teacherEmail.isBlank()) {
+                    ArrayList<Course> courseByTeacher = DAO.viewCourseByTeacher(new Teacher(teacherEmail));
+                    out.println(gson.toJson(courseByTeacher));
+                    out.flush();
+                } else {
+                    System.out.println("Null title parameter");
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                }
+                break;
+
+            case "list-course-not-taught-by-teacher":
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                teacherEmail = jsonObject.get("teacherEmail").getAsString();
+
+                if (teacherEmail != null && !teacherEmail.isBlank()) {
+                    ArrayList<Course> courseByTeacher = DAO.viewCourseNotTaughtByTeacher(new Teacher(teacherEmail));
+                    out.println(gson.toJson(courseByTeacher));
+                    out.flush();
+                } else {
+                    System.out.println("Null title parameter");
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                }
+                break;
+
+            case "list-teacher-availability":
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                teacherEmail = jsonObject.get("teacherEmail").getAsString();
+
+                if (teacherEmail != null && !teacherEmail.isBlank()) {
+                    ArrayList<TimeSlot> timeSlots = DAO.queryTeacherAvailability(new Teacher(teacherEmail));
+                    out.println(gson.toJson(timeSlots));
+                    out.flush();
+                } else {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                }
+                break;
+
             default:
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+
         }
     }
 
+    // TODO (3): Spostare tutte le request che contengono header dati nella POST
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
@@ -555,9 +638,6 @@ public class ServletController extends HttpServlet {
         String action = request.getParameter("action");
         PrintWriter out = response.getWriter();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        String jsonString;
-        JsonObject jsonObject;
 
         switch (action) {
             case "list-active-users":
@@ -590,35 +670,6 @@ public class ServletController extends HttpServlet {
                 ArrayList<Teacher> deactivatedTeachers = DAO.queryDeactivatedTeachers();
                 out.println(gson.toJson(deactivatedTeachers));
                 out.flush();
-                break;
-
-            case "list-teacher-availability":
-                jsonString = readJSONRequest(request);
-                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                String teacherEmail = jsonObject.get("teacherEmail").getAsString();
-
-                if (teacherEmail != null && !teacherEmail.isBlank()) {
-                    ArrayList<TimeSlot> timeSlots = DAO.queryTeacherAvailability(new Teacher(teacherEmail));
-                    out.println(gson.toJson(timeSlots));
-                    out.flush();
-                } else {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                }
-                break;
-
-            case "list-teacher-by-course":
-                jsonString = readJSONRequest(request);
-                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                String title = jsonObject.get("title").getAsString();
-
-                if (title != null && !title.isBlank()) {
-                    ArrayList<Teacher> teacherByCourse = DAO.viewTeacherByCourse(new Course(title));
-                    out.println(gson.toJson(teacherByCourse));
-                    out.flush();
-                } else {
-                    System.out.println("Null title parameter");
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                }
                 break;
 
             case "list-active-courses":

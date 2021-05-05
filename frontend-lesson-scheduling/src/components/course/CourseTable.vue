@@ -91,6 +91,7 @@
       <b-table
         :items="courseList"
         :fields="fields"
+        empty-text="Non ci sono corsi da mostrare"
         head-variant="light"
         :current-page="currentPage"
         :per-page="perPage"
