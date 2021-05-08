@@ -10,40 +10,28 @@ import Login from "../views/Login";
 Vue.use(VueRouter);
 
 const routes = [{
-    path: "/",
+    path: "",
     name: "Home",
     component: Home,
+    meta: {
+      guest: true
+    },
   },
   {
     path: "/adminDashboard",
     name: "AdminDashboard",
     component: AdminDashboard,
-    async beforeEnter(to, from, next) {
-      if (store.getters.isAuthenticated && store.getters.isAdmin) {
-        next();
-      } else if (store.getters.isAuthenticated && !store.getters.isAdmin) {
-        next({
-          name: "UserDashboard"
-        })
-      } else {
-        next({
-          name: "Home"
-        })
-      }
+    meta: {
+      requiresAuth: true,
+      isAdmin: true
     }
   },
   {
     path: "/userDashboard",
     name: "UserDashboard",
     component: UserDashboard,
-    async beforeEnter(to, from, next) {
-      if (store.getters.isAuthenticated && !store.getters.isAdmin) {
-        next();
-      } else {
-        next({
-          name: "Home"
-        })
-      }
+    meta: {
+      requiresAuth: true,
     }
   },
   {
@@ -70,40 +58,31 @@ const router = new VueRouter({
   routes,
 });
 
-/**
- * Ferma gli utenti non autenticati che cercano di accedere 
- * a routes che richiedono il meta {requiresAuth: true}
- * Se l'utente è già autenticato può proseguire liberamente
- * Se l'utente non è autenticato viene rimandato a /login
- */
-// router.beforeEach((to, from, next) => {
-//   if (to.matched.some((record) => record.meta.requiresAuth)) {
-//     if (store.getters.isAuthenticated) {
-//       next();
-//       return;
-//     }
-//     next("/login");
-//   } else {
-//     next();
-//   }
-// });
-
-/**
- * Ferma gli utenti autenticati che cercano di accedere a routes 
- * che richiedono il meta {guest: true}
- * Se l'utente è già autenticato non può accedere a meta {guest: true}
- * Se l'utente non è autenticato può accedere a meta {guest: true}
- */
-// router.beforeEach((to, from, next) => {
-//   if (to.matched.some((record) => record.meta.guest)) {
-//     if (store.getters.isAuthenticated) {
-//       next("/bookings");
-//       return;
-//     }
-//     next();
-//   } else {
-//     next();
-//   }
-// });
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!store.getters.isAuthenticated) {
+      next({
+        path: '/login',
+        params: {
+          nextUrl: to.fullPath
+        }
+      })
+    } else {
+      if (to.matched.some(record => record.meta.isAdmin)) {
+        if (store.getters.isAdmin) {
+          next()
+        } else {
+          next({
+            name: "UserDashboard"
+          })
+        }
+      } else {
+        next()
+      }
+    }
+  } else if (to.matched.some(record => record.meta.guest)) {
+    next()
+  }
+})
 
 export default router;

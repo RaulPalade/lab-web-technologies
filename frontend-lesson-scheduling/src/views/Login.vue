@@ -43,22 +43,33 @@ export default {
       showError: false,
     };
   },
+
+  computed: {
+    isAdmin: function() {
+      return this.$store.getters.isAdmin;
+    },
+  },
+
   methods: {
     ...mapActions(["LogIn"]),
+
     async submit() {
       const User = {
         email: this.form.email,
         password: this.form.password,
       };
-
-      console.log(User);
-
       try {
         await this.LogIn(User);
-        this.$router.push("/adminDashboard");
+        if (this.isAdmin) {
+          this.$router.push("/adminDashboard");
+        } else {
+          this.$router.push("/userDashboard");
+        }
+
         this.showError = false;
       } catch (error) {
         this.showError = true;
+        console.log(error);
       }
     },
   },

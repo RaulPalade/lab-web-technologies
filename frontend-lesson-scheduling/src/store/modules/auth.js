@@ -56,9 +56,6 @@ const getters = {
 }
 
 const actions = {
-
-    // TODO: Aggiungere il dispatch anche ai metodi di inserimento per aggiornare le liste 
-
     // POST METHODS
     async LogIn({
         commit

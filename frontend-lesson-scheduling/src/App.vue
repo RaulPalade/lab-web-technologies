@@ -28,10 +28,8 @@ export default {
 
 <style lang="scss">
 @import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,900;1,900&display=swap");
-// @import url("https://fonts.googleapis.com/css2?family=Lilita+One&display=swap");
 * {
   box-sizing: border-box;
-  // background: #fff;
 }
 
 html,

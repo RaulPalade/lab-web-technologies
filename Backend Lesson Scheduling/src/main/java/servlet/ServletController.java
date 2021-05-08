@@ -84,14 +84,10 @@ public class ServletController extends HttpServlet {
             case "login":
                 jsonString = readJSONRequest(request);
                 jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-
                 userEmail = jsonObject.get("email").getAsString();
-                System.out.println(userEmail);
                 password = jsonObject.get("password").getAsString();
-                System.out.println(password);
                 if ((userEmail != null && !userEmail.isBlank() && password != null && !password.isBlank()) && DAO.loginUser(new User(userEmail, password))) {
                     HttpSession session = request.getSession();
-                    String jSessionId = session.getId();
                     session.setAttribute("emailUser", userEmail);
                     boolean isAdmin = DAO.isAdmin(new User(userEmail));
                     session.setMaxInactiveInterval(30 * 60);
@@ -99,24 +95,13 @@ public class ServletController extends HttpServlet {
                     userCookie.setMaxAge(30 * 60);
                     response.addCookie(userCookie);
                     out.println(isAdmin);
-                    System.out.println("Login Success with jSessionID: " + jSessionId);
                 } else {
-                    System.out.println("Wrong Email or Password");
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
             case "logout":
                 response.setContentType("text/html");
-                Cookie[] cookies = request.getCookies();
-                if (cookies != null) {
-                    for (Cookie cookie : cookies) {
-                        if (cookie.getName().equals("JSESSIONID")) {
-                            System.out.println("JSESSIONID = " + cookie.getValue());
-                        }
-                    }
-                }
-
                 HttpSession session = request.getSession(false);
                 if (session != null) {
                     session.invalidate();
@@ -135,11 +120,12 @@ public class ServletController extends HttpServlet {
                     password = "password1";
 
                     if (userName != null && !userName.isBlank() && userSurname != null && !userSurname.isBlank() && userEmail != null && !userEmail.isBlank()) {
-                        if (DAO.insertUser(new User(userName, userSurname, userEmail, password, administrator))) {
+                        User newUser = new User(userName, userSurname, userEmail, password, administrator);
+                        if (DAO.insertUser(newUser)) {
                             response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfUserExists(new User(userName, userSurname, userEmail, password, administrator))) {
-                                response.sendError(HttpServletResponse.SC_CONFLICT);
+                                DAO.activateUser(newUser);
                             }
                         }
                     } else {
@@ -204,13 +190,12 @@ public class ServletController extends HttpServlet {
                     password = "password1";
 
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
-                        if (DAO.insertTeacher(new Teacher(teacherName, teacherSurname, teacherEmail, password))) {
-                            System.out.println("Teacher registered");
+                        Teacher newTeacher = new Teacher(teacherName, teacherSurname, teacherEmail, password);
+                        if (DAO.insertTeacher(newTeacher)) {
                             response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfTeacherExists(new Teacher(teacherName, teacherSurname, teacherEmail, password))) {
-                                System.out.println("Teacher already exists");
-                                response.sendError(HttpServletResponse.SC_CONFLICT);
+                                DAO.activateTeacher(newTeacher);
                             }
                         }
                     } else {
@@ -231,7 +216,6 @@ public class ServletController extends HttpServlet {
 
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
                         if (DAO.activateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail))) {
-                            System.out.println("Teacher activated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -254,7 +238,6 @@ public class ServletController extends HttpServlet {
 
                     if (teacherName != null && !teacherName.isBlank() && teacherSurname != null && !teacherSurname.isBlank() && teacherEmail != null && !teacherEmail.isBlank()) {
                         if (DAO.deactivateTeacher(new Teacher(teacherName, teacherSurname, teacherEmail))) {
-                            System.out.println("Teacher deactivated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -276,12 +259,10 @@ public class ServletController extends HttpServlet {
 
                     if (title != null && !title.isBlank()) {
                         if (DAO.insertCourse(new Course(title))) {
-                            System.out.println("Course registered");
                             response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfCourseExists(new Course(title))) {
-                                System.out.println("Course already exists");
-                                response.sendError(HttpServletResponse.SC_CONFLICT);
+                                DAO.activateCourse(new Course(title));
                             }
                         }
                     }
@@ -298,7 +279,6 @@ public class ServletController extends HttpServlet {
 
                     if (title != null && !title.isBlank()) {
                         if (DAO.activateCourse(new Course(title))) {
-                            System.out.println("Course activated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -319,7 +299,6 @@ public class ServletController extends HttpServlet {
 
                     if (title != null && !title.isBlank()) {
                         if (DAO.deactivateCourse(new Course(title))) {
-                            System.out.println("Course deactivated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -341,12 +320,10 @@ public class ServletController extends HttpServlet {
 
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.insertTimeSlot(new TimeSlot(day, hour))) {
-                            System.out.println("TimeSlot registered");
                             response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfTimeSlotExists(new TimeSlot(day, hour))) {
-                                System.out.println("TimeSlot already exists");
-                                response.sendError(HttpServletResponse.SC_CONFLICT);
+                                DAO.activateTimeSlot(new TimeSlot(day, hour));
                             }
                         }
                     }
@@ -364,7 +341,6 @@ public class ServletController extends HttpServlet {
 
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.activateTimeSlot(new TimeSlot(day, hour))) {
-                            System.out.println("TimeSlot activated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -386,7 +362,6 @@ public class ServletController extends HttpServlet {
 
                     if (day != null && !day.isBlank() && !String.valueOf(hour).isBlank()) {
                         if (DAO.deactivateTimeSlot(new TimeSlot(day, hour))) {
-                            System.out.println("TimeSlot deactivated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
 
@@ -409,12 +384,10 @@ public class ServletController extends HttpServlet {
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.assignTeaching(new Teacher(teacherEmail), new Course(title))) {
-                            System.out.println("Teacher assignment registered");
                             response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
                             if (DAO.checkIfTeachingExists(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
-                                response.sendError(HttpServletResponse.SC_CONFLICT);
-                                System.out.println("Teacher assignment already exists");
+                                DAO.activateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)));
                             }
                         }
                     }
@@ -432,7 +405,6 @@ public class ServletController extends HttpServlet {
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.activateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
-                            System.out.println("Teaching activated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -454,7 +426,6 @@ public class ServletController extends HttpServlet {
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.deactivateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
-                            System.out.println("Teaching deactivated");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -472,7 +443,6 @@ public class ServletController extends HttpServlet {
                     jsonString = readJSONRequest(request);
                     jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
                     userEmail = request.getSession().getAttribute("emailUser").toString();
-                    System.out.println(userEmail);
                     day = jsonObject.get("day").getAsString();
                     hour = Integer.parseInt(jsonObject.get("hour").getAsString());
                     teacherEmail = jsonObject.get("teacherEmail").getAsString();
@@ -480,10 +450,8 @@ public class ServletController extends HttpServlet {
 
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.insertBooking(new User(userEmail), new TimeSlot(day, hour), new Teacher(teacherEmail), new Course(title))) {
-                            System.out.println("Booking registered");
                             response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
-                            System.out.println("Error during booking insertion");
                             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                         }
                     } else {
@@ -510,7 +478,6 @@ public class ServletController extends HttpServlet {
 
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
-                            System.out.println("Booking deleted");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -539,7 +506,6 @@ public class ServletController extends HttpServlet {
 
                     if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
-                            System.out.println("Booking completed");
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -560,7 +526,6 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(teacherByCourse));
                     out.flush();
                 } else {
-                    System.out.println("Null title parameter");
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
@@ -575,7 +540,6 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(teacherByCourse));
                     out.flush();
                 } else {
-                    System.out.println("Null title parameter");
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
@@ -590,7 +554,6 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(courseByTeacher));
                     out.flush();
                 } else {
-                    System.out.println("Null title parameter");
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
@@ -605,7 +568,6 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(courseByTeacher));
                     out.flush();
                 } else {
-                    System.out.println("Null title parameter");
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
@@ -630,7 +592,6 @@ public class ServletController extends HttpServlet {
         }
     }
 
-    // TODO (3): Spostare tutte le request che contengono header dati nella POST
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
@@ -684,7 +645,6 @@ public class ServletController extends HttpServlet {
                 out.flush();
                 break;
 
-            // TODO (1): Aggiungere metodo per query active teaching e deactivated teaching
             case "list-teacher-courses":
                 ArrayList<TeacherCourse> teacherCourses = DAO.queryTeacherCourse();
                 out.println(gson.toJson(teacherCourses));
@@ -738,7 +698,6 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(personalBookings));
                     out.flush();
                 } else {
-                    System.out.println("Null user-email parameter");
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
@@ -750,7 +709,6 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(personalActiveBookings));
                     out.flush();
                 } else {
-                    System.out.println("Null user-email parameter");
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
@@ -762,7 +720,6 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(personalCompletedBookings));
                     out.flush();
                 } else {
-                    System.out.println("Null user-email parameter");
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
@@ -774,7 +731,6 @@ public class ServletController extends HttpServlet {
                     out.println(gson.toJson(personalDeletedBookings));
                     out.flush();
                 } else {
-                    System.out.println("Null user-email parameter");
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
