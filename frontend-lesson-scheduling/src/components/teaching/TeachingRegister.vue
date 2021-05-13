@@ -75,6 +75,9 @@ export default {
     }),
 
     teachers() {
+      if (this.ActiveTeacherList === null) {
+        return [];
+      }
       return this.ActiveTeacherList.map((teacher) => ({
         text: teacher.name + " " + teacher.surname,
         value: teacher,
@@ -82,7 +85,7 @@ export default {
     },
 
     courses() {
-      if (this.FilteredTimeSlotList === null) {
+      if (this.FilteredCourseList === null) {
         return [];
       }
       return this.FilteredCourseList.map((course) => ({

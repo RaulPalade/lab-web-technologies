@@ -177,11 +177,19 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.bookingList.length;
+    if (this.bookingList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.bookingList.length;
+    }
   },
 
   beforeUpdate() {
-    this.totalRows = this.bookingList.length;
+    if (this.bookingList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.bookingList.length;
+    }
   },
 
   computed: {

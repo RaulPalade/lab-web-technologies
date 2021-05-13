@@ -171,11 +171,19 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.timeSlotList.length;
+    if (this.timeSlotList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.timeSlotList.length;
+    }
   },
 
   beforeUpdate() {
-    this.totalRows = this.timeSlotList.length;
+    if (this.timeSlotList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.timeSlotList.length;
+    }
   },
 
   computed: {

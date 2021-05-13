@@ -2,9 +2,12 @@ package datamodel;
 
 import org.jetbrains.annotations.NotNull;
 import org.mindrot.jbcrypt.BCrypt;
+import utils.Validator;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Raul Palade
@@ -70,110 +73,159 @@ public class DAO {
     }
 
     public static boolean loginUser(User user) {
-        if (user == null) {
+        if (user != null && Validator.validateEmail(user.getEmail())) {
+            Connection connection = null;
+            boolean loginResult = false;
+
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select Email, Password from user where Email = ?");
+                statement.setString(1, user.getEmail());
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    loginResult = resultSet.getString(1).equals(user.getEmail()) &&
+                            BCrypt.checkpw(user.getPassword(), resultSet.getString(2));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return loginResult;
+        } else {
             return false;
         }
 
-        Connection connection = null;
-        boolean loginResult = false;
-
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select Email, Password from user where Email = ?");
-            statement.setString(1, user.getEmail());
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                loginResult = resultSet.getString(1).equals(user.getEmail()) &&
-                        BCrypt.checkpw(user.getPassword(), resultSet.getString(2));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return loginResult;
     }
 
     public static boolean isAdmin(User user) {
-        if (user == null) {
-            return false;
-        }
+        if (user != null && Validator.validateEmail(user.getEmail())) {
+            Connection connection = null;
+            int rowAffected = 0;
 
-        Connection connection = null;
-        int rowAffected = 0;
-
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select Administrator from user where active = ? and Email = ?");
-            statement.setBoolean(1, true);
-            statement.setString(2, user.getEmail());
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                rowAffected = resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select Administrator from user where active = ? and Email = ?");
+                statement.setBoolean(1, true);
+                statement.setString(2, user.getEmail());
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    rowAffected = resultSet.getInt(1);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
 
-        return rowAffected != 0;
+            return rowAffected != 0;
+        } else {
+            return false;
+        }
+    }
+
+    public static Set<TimeSlot> queryUserAvailability(User user) {
+        if (user != null && Validator.validateEmail(user.getEmail())) {
+            Connection connection = null;
+            Set<TimeSlot> availableSlots = new HashSet<>();
+
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select IdTimeSlot, Day, Hour\n" +
+                        "from time_slot\n" +
+                        "where Active = ?\n" +
+                        "  and (Day, Hour) not in\n" +
+                        "      (select Day, Hour\n" +
+                        "       from booking\n" +
+                        "                join time_slot ts on booking.IdTimeSlot = ts.IdTimeSlot\n" +
+                        "                join user u on booking.IdUser = u.IdUser\n" +
+                        "       where booking.Completed = ?\n" +
+                        "         and booking.Deleted = ?\n" +
+                        "         and u.Email = ?);");
+                statement.setBoolean(1, true);
+                statement.setBoolean(2, false);
+                statement.setBoolean(3, false);
+                statement.setString(4, user.getEmail());
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    TimeSlot timeSlot = new TimeSlot(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3));
+                    availableSlots.add(timeSlot);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return availableSlots;
+        } else {
+            return new HashSet<>();
+        }
     }
 
     public static boolean insertUser(User user) {
-        if (user == null) {
+        if (user != null && (Validator.validateName(user.getName()) && Validator.validateName(user.getSurname()) && Validator.validateEmail(user.getEmail()))) {
+            Connection connection = null;
+            int rowAffected = 0;
+            String salt = BCrypt.gensalt(SALT);
+
+            try {
+                connection = DAO.connect();
+                String hashedPassword = BCrypt.hashpw(user.getPassword(), salt);
+                System.out.println(hashedPassword);
+                PreparedStatement statement = connection.prepareStatement("insert into user (Name, Surname, Email, Password, Administrator) values (?, ?, ?, ?, ?)");
+                statement.setString(1, user.getName());
+                statement.setString(2, user.getSurname());
+                statement.setString(3, user.getEmail());
+                statement.setString(4, hashedPassword);
+                statement.setBoolean(5, user.isAdministrator());
+                rowAffected = statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return rowAffected != 0;
+        } else {
             return false;
         }
 
-        Connection connection = null;
-        int rowAffected = 0;
-        String salt = BCrypt.gensalt(SALT);
-
-        try {
-            connection = DAO.connect();
-            String hashedPassword = BCrypt.hashpw(user.getPassword(), salt);
-            System.out.println(hashedPassword);
-            PreparedStatement statement = connection.prepareStatement("insert into user (Name, Surname, Email, Password, Administrator) values (?, ?, ?, ?, ?)");
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getSurname());
-            statement.setString(3, user.getEmail());
-            statement.setString(4, hashedPassword);
-            statement.setBoolean(5, user.isAdministrator());
-            rowAffected = statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return rowAffected != 0;
     }
 
     public static boolean activateUser(User user) {
-        return user != null && changeUserStatus(user, true);
+        boolean validUser = user != null && (Validator.validateName(user.getName()) && Validator.validateName(user.getSurname()) && Validator.validateEmail(user.getEmail()));
+        return validUser && changeUserStatus(user, true);
     }
 
     public static boolean deactivateUser(User user) {
-        return user != null && changeUserStatus(user, false);
+        boolean validUser = user != null && (Validator.validateName(user.getName()) && Validator.validateName(user.getSurname()) && Validator.validateEmail(user.getEmail()));
+        return validUser && changeUserStatus(user, false);
     }
 
     private static boolean changeUserStatus(User user, boolean status) {
@@ -204,34 +256,43 @@ public class DAO {
     }
 
     public static boolean checkIfUserExists(User user) {
-        if (user == null) {
+        if (user != null && Validator.validateEmail(user.getEmail())) {
+            Connection connection = null;
+            int rowAffected = 0;
+
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select exists (select * from user where Email = ?)");
+                statement.setString(1, user.getEmail());
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    rowAffected = resultSet.getInt(1);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return rowAffected != 0;
+        } else {
             return false;
         }
 
-        Connection connection = null;
-        int rowAffected = 0;
+    }
 
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select exists (select * from user where Email = ?)");
-            statement.setString(1, user.getEmail());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                rowAffected = resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public static @NotNull ArrayList<Teacher> queryActiveTeachers() {
+        return queryTeachers(true);
+    }
 
-        return rowAffected != 0;
+    public static @NotNull ArrayList<Teacher> queryDeactivatedTeachers() {
+        return queryTeachers(false);
     }
 
     private static @NotNull ArrayList<Teacher> queryTeachers(boolean active) {
@@ -265,94 +326,95 @@ public class DAO {
         return teachers;
     }
 
-    public static @NotNull ArrayList<Teacher> queryActiveTeachers() {
-        return queryTeachers(true);
-    }
+    public static Set<TimeSlot> queryTeacherAvailability(Teacher teacher) {
+        if (teacher != null && Validator.validateEmail(teacher.getEmail())) {
+            Connection connection = null;
+            Set<TimeSlot> availableSlots = new HashSet<>();
 
-    public static @NotNull ArrayList<Teacher> queryDeactivatedTeachers() {
-        return queryTeachers(false);
-    }
-
-    public static ArrayList<TimeSlot> queryTeacherAvailability(Teacher teacher) {
-        Connection connection = null;
-        ArrayList<TimeSlot> availableSlots = new ArrayList<>();
-
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select IdTimeSlot, Day, Hour\n" +
-                    "from time_slot\n" +
-                    "where Active = ?\n" +
-                    "  and (Day, Hour) not in\n" +
-                    "      (select Day, Hour\n" +
-                    "       from booking\n" +
-                    "                join time_slot ts on booking.IdTimeSlot = ts.IdTimeSlot\n" +
-                    "                join teacher_course tc on tc.IdTeacher = booking.IdTeacher and tc.IdCourse = booking.IdCourse\n" +
-                    "                join teacher t on tc.IdTeacher = t.IdTeacher\n" +
-                    "       where booking.Completed = ?\n" +
-                    "         and booking.Deleted = ?\n" +
-                    "         and t.Email = ?);");
-            statement.setBoolean(1, true);
-            statement.setBoolean(2, false);
-            statement.setBoolean(3, false);
-            statement.setString(4, teacher.getEmail());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                TimeSlot timeSlot = new TimeSlot(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3));
-                availableSlots.add(timeSlot);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select IdTimeSlot, Day, Hour\n" +
+                        "from time_slot\n" +
+                        "where Active = ?\n" +
+                        "  and (Day, Hour) not in\n" +
+                        "      (select Day, Hour\n" +
+                        "       from booking\n" +
+                        "                join time_slot ts on booking.IdTimeSlot = ts.IdTimeSlot\n" +
+                        "                join teacher_course tc on tc.IdTeacher = booking.IdTeacher and tc.IdCourse = booking.IdCourse\n" +
+                        "                join teacher t on tc.IdTeacher = t.IdTeacher\n" +
+                        "       where booking.Completed = ?\n" +
+                        "         and booking.Deleted = ?\n" +
+                        "         and t.Email = ?);");
+                statement.setBoolean(1, true);
+                statement.setBoolean(2, false);
+                statement.setBoolean(3, false);
+                statement.setString(4, teacher.getEmail());
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    TimeSlot timeSlot = new TimeSlot(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3));
+                    availableSlots.add(timeSlot);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+
+            return availableSlots;
+        } else {
+            return new HashSet<>();
         }
 
-        return availableSlots;
+
     }
 
     public static boolean insertTeacher(Teacher teacher) {
-        if (teacher == null) {
+        if (teacher != null && (Validator.validateName(teacher.getName()) && Validator.validateName(teacher.getSurname()) && Validator.validateEmail(teacher.getEmail()))) {
+            Connection connection = null;
+            int rowAffected = 0;
+            String salt = BCrypt.gensalt(SALT);
+            try {
+                connection = DAO.connect();
+                String hashedPassword = BCrypt.hashpw(teacher.getPassword(), salt);
+                PreparedStatement statement = connection.prepareStatement("insert into teacher (Name, Surname, Email, Password) values (?, ?, ?, ?)");
+                statement.setString(1, teacher.getName());
+                statement.setString(2, teacher.getSurname());
+                statement.setString(3, teacher.getEmail());
+                statement.setString(4, hashedPassword);
+                rowAffected = statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return rowAffected != 0;
+        } else {
             return false;
         }
 
-        Connection connection = null;
-        int rowAffected = 0;
-        String salt = BCrypt.gensalt(SALT);
-        try {
-            connection = DAO.connect();
-            String hashedPassword = BCrypt.hashpw(teacher.getPassword(), salt);
-            PreparedStatement statement = connection.prepareStatement("insert into teacher (Name, Surname, Email, Password) values (?, ?, ?, ?)");
-            statement.setString(1, teacher.getName());
-            statement.setString(2, teacher.getSurname());
-            statement.setString(3, teacher.getEmail());
-            statement.setString(4, hashedPassword);
-            rowAffected = statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return rowAffected != 0;
     }
 
     public static boolean activateTeacher(Teacher teacher) {
-        return teacher != null && changeTeacherStatus(teacher, true);
+        boolean validTeacher = teacher != null && (Validator.validateName(teacher.getName()) && Validator.validateName(teacher.getSurname()) && Validator.validateEmail(teacher.getEmail()));
+        return validTeacher && changeTeacherStatus(teacher, true);
     }
 
     public static boolean deactivateTeacher(Teacher teacher) {
-        return teacher != null && changeTeacherStatus(teacher, false);
+        boolean validTeacher = teacher != null && (Validator.validateName(teacher.getName()) && Validator.validateName(teacher.getSurname()) && Validator.validateEmail(teacher.getEmail()));
+        return validTeacher && changeTeacherStatus(teacher, false);
     }
 
     private static boolean changeTeacherStatus(Teacher teacher, boolean status) {
@@ -383,34 +445,43 @@ public class DAO {
     }
 
     public static boolean checkIfTeacherExists(Teacher teacher) {
-        if (teacher == null) {
+        if (teacher != null && Validator.validateEmail(teacher.getEmail())) {
+            Connection connection = null;
+            int rowAffected = 0;
+
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select exists (select * from teacher where Email = ?)");
+                statement.setString(1, teacher.getEmail());
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    rowAffected = resultSet.getInt(1);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return rowAffected != 0;
+        } else {
             return false;
         }
 
-        Connection connection = null;
-        int rowAffected = 0;
+    }
 
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select exists (select * from teacher where Email = ?)");
-            statement.setString(1, teacher.getEmail());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                rowAffected = resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public static @NotNull ArrayList<Course> queryActiveCourses() {
+        return queryCourses(true);
+    }
 
-        return rowAffected != 0;
+    public static @NotNull ArrayList<Course> queryDeactivatedCourses() {
+        return queryCourses(false);
     }
 
     private static @NotNull ArrayList<Course> queryCourses(boolean active) {
@@ -439,14 +510,6 @@ public class DAO {
         }
 
         return courses;
-    }
-
-    public static @NotNull ArrayList<Course> queryActiveCourses() {
-        return queryCourses(true);
-    }
-
-    public static @NotNull ArrayList<Course> queryDeactivatedCourses() {
-        return queryCourses(false);
     }
 
     public static boolean insertCourse(Course course) {
@@ -539,6 +602,14 @@ public class DAO {
         return rowAffected != 0;
     }
 
+    public static @NotNull ArrayList<TimeSlot> queryActiveTimeSlots() {
+        return queryTimeSlots(true);
+    }
+
+    public static @NotNull ArrayList<TimeSlot> queryDeactivatedTimeSlots() {
+        return queryTimeSlots(false);
+    }
+
     private static ArrayList<TimeSlot> queryTimeSlots(boolean active) {
         Connection connection = null;
         ArrayList<TimeSlot> timeSlots = new ArrayList<>();
@@ -565,14 +636,6 @@ public class DAO {
         }
 
         return timeSlots;
-    }
-
-    public static @NotNull ArrayList<TimeSlot> queryActiveTimeSlots() {
-        return queryTimeSlots(true);
-    }
-
-    public static @NotNull ArrayList<TimeSlot> queryDeactivatedTimeSlots() {
-        return queryTimeSlots(false);
     }
 
     public static boolean insertTimeSlot(TimeSlot timeSlot) {
@@ -700,42 +763,45 @@ public class DAO {
     }
 
     public static boolean assignTeaching(Teacher teacher, Course course) {
-        if (teacher == null || course == null) {
+        if ((course != null && teacher != null && Validator.validateEmail(teacher.getEmail()))) {
+            Connection connection = null;
+            int rowAffected = 0;
+
+            int idTeacher = getIdTeacher(teacher.getEmail());
+            int idCourse = getIdCourse(course.getTitle());
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("insert into teacher_course (IdTeacher, IdCourse) values (?, ?)");
+                statement.setInt(1, idTeacher);
+                statement.setInt(2, idCourse);
+                rowAffected = statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return rowAffected != 0;
+        } else {
             return false;
         }
 
-        Connection connection = null;
-        int rowAffected = 0;
-
-        int idTeacher = getIdTeacher(teacher.getEmail());
-        int idCourse = getIdCourse(course.getTitle());
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("insert into teacher_course (IdTeacher, IdCourse) values (?, ?)");
-            statement.setInt(1, idTeacher);
-            statement.setInt(2, idCourse);
-            rowAffected = statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return rowAffected != 0;
     }
 
     public static boolean activateTeaching(TeacherCourse teacherCourse) {
-        return teacherCourse != null && changeTeachingStatus(teacherCourse, true);
+        boolean validTeacher = teacherCourse != null && Validator.validateEmail(teacherCourse.getTeacher().getEmail());
+        return validTeacher && changeTeachingStatus(teacherCourse, true);
     }
 
     public static boolean deactivateTeaching(TeacherCourse teacherCourse) {
-        return teacherCourse != null && changeTeachingStatus(teacherCourse, false);
+        boolean validTeacher = teacherCourse != null && Validator.validateEmail(teacherCourse.getTeacher().getEmail());
+        return validTeacher && changeTeachingStatus(teacherCourse, false);
     }
 
     private static boolean changeTeachingStatus(TeacherCourse teacherCourse, boolean status) {
@@ -768,38 +834,39 @@ public class DAO {
     }
 
     public static boolean checkIfTeachingExists(TeacherCourse teacherCourse) {
-        if (teacherCourse == null) {
+        if (teacherCourse != null && Validator.validateEmail(teacherCourse.getTeacher().getEmail())) {
+            Connection connection = null;
+            int rowAffected = 0;
+
+            int idTeacher = getIdTeacher(teacherCourse.getTeacher().getEmail());
+            int idCourse = getIdCourse(teacherCourse.getCourse().getTitle());
+
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select exists (select * from teacher_course where IdTeacher = ? and IdCourse = ?)");
+                statement.setInt(1, idTeacher);
+                statement.setInt(2, idCourse);
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    rowAffected = resultSet.getInt(1);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return rowAffected != 0;
+        } else {
             return false;
         }
 
-        Connection connection = null;
-        int rowAffected = 0;
-
-        int idTeacher = getIdTeacher(teacherCourse.getTeacher().getEmail());
-        int idCourse = getIdCourse(teacherCourse.getCourse().getTitle());
-
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select exists (select * from teacher_course where IdTeacher = ? and IdCourse = ?)");
-            statement.setInt(1, idTeacher);
-            statement.setInt(2, idCourse);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                rowAffected = resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return rowAffected != 0;
     }
 
     private static ArrayList<Teacher> viewTeacherByCourse(Course course, boolean active) {
@@ -847,82 +914,84 @@ public class DAO {
     }
 
     public static ArrayList<Course> viewCourseByTeacher(Teacher teacher) {
-        if (teacher == null) {
+        if (teacher != null && Validator.validateEmail(teacher.getEmail())) {
+            Connection connection = null;
+            int idTeacher = getIdTeacher(teacher.getEmail());
+            ArrayList<Course> courses = new ArrayList<>();
+
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select Title\n" +
+                        "from course\n" +
+                        "         join teacher_course tc on course.IdCourse = tc.IdCourse\n" +
+                        "         join teacher t on tc.IdTeacher = t.IdTeacher\n" +
+                        "where tc.Active = ? and t.IdTeacher = ?;");
+                statement.setBoolean(1, true);
+                statement.setInt(2, idTeacher);
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    Course course = new Course(resultSet.getString("Title"));
+                    courses.add(course);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return courses;
+        } else {
             return new ArrayList<>();
         }
 
-        Connection connection = null;
-        int idTeacher = getIdTeacher(teacher.getEmail());
-        ArrayList<Course> courses = new ArrayList<>();
-
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select Title\n" +
-                    "from course\n" +
-                    "         join teacher_course tc on course.IdCourse = tc.IdCourse\n" +
-                    "         join teacher t on tc.IdTeacher = t.IdTeacher\n" +
-                    "where tc.Active = ? and t.IdTeacher = ?;");
-            statement.setBoolean(1, true);
-            statement.setInt(2, idTeacher);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Course course = new Course(resultSet.getString("Title"));
-                courses.add(course);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return courses;
     }
 
     public static ArrayList<Course> viewCourseNotTaughtByTeacher(Teacher teacher) {
-        if (teacher == null) {
+        if (teacher != null && Validator.validateEmail(teacher.getEmail())) {
+            Connection connection = null;
+            int idTeacher = getIdTeacher(teacher.getEmail());
+            ArrayList<Course> courses = new ArrayList<>();
+
+            try {
+                connection = DAO.connect();
+                PreparedStatement statement = connection.prepareStatement("select Title\n" +
+                        "from course\n" +
+                        "where Title not in (select Title\n" +
+                        "                       from course\n" +
+                        "                                join teacher_course tc on course.IdCourse = tc.IdCourse\n" +
+                        "                                join teacher t on tc.IdTeacher = t.IdTeacher\n" +
+                        "                       where tc.Active = ?\n" +
+                        "                         and t.IdTeacher = ?);");
+                statement.setBoolean(1, true);
+                statement.setInt(2, idTeacher);
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    Course course = new Course(resultSet.getString("Title"));
+                    courses.add(course);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return courses;
+        } else {
             return new ArrayList<>();
         }
 
-        Connection connection = null;
-        int idTeacher = getIdTeacher(teacher.getEmail());
-        ArrayList<Course> courses = new ArrayList<>();
-
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select Title\n" +
-                    "from course\n" +
-                    "where Title not in (select Title\n" +
-                    "                       from course\n" +
-                    "                                join teacher_course tc on course.IdCourse = tc.IdCourse\n" +
-                    "                                join teacher t on tc.IdTeacher = t.IdTeacher\n" +
-                    "                       where tc.Active = ?\n" +
-                    "                         and t.IdTeacher = ?);");
-            statement.setBoolean(1, true);
-            statement.setInt(2, idTeacher);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Course course = new Course(resultSet.getString("Title"));
-                courses.add(course);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return courses;
     }
 
     public static ArrayList<Booking> queryAllBookings() {
@@ -1001,119 +1070,33 @@ public class DAO {
     }
 
     public static ArrayList<Booking> queryPersonalBookings(User user) {
-        if (user == null) {
-            return new ArrayList<>();
-        }
+        if (user != null && Validator.validateEmail(user.getEmail())) {
+            Connection connection = null;
+            ArrayList<Booking> personalBookings = new ArrayList<>();
 
-        Connection connection = null;
-        ArrayList<Booking> personalBookings = new ArrayList<>();
-
-        try {
-            connection = DAO.connect();
-            PreparedStatement statement = connection.prepareStatement("select ts.IdTimeSlot, ts.Day, ts.Hour, " +
-                    "t.idTeacher, t.Name, t.Surname, t.Email, " +
-                    "c.idCourse, c.Title, Deleted, Completed\n" +
-                    "from booking\n" +
-                    "         join user u on u.IdUser = booking.IdUser\n" +
-                    "         join time_slot ts on ts.IdTimeSlot = booking.IdTimeSlot\n" +
-                    "         join teacher_course tc on tc.IdTeacher = booking.IdTeacher and tc.IdCourse = booking.IdCourse\n" +
-                    "         join teacher t on t.IdTeacher = tc.IdTeacher\n" +
-                    "         join course c on c.IdCourse = tc.IdCourse\n" +
-                    "where u.Email = ?;");
-            statement.setString(1, user.getEmail());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                TimeSlot timeSlot = new TimeSlot(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3));
-                Teacher teacher = new Teacher(resultSet.getInt(4), resultSet.getString(5), resultSet.getString(6), resultSet.getString(7));
-                Course course = new Course(resultSet.getInt(8), resultSet.getString(9));
-                TeacherCourse teacherCourse = new TeacherCourse(teacher, course);
-
-                Booking booking = new Booking(timeSlot, teacherCourse, resultSet.getBoolean(10), resultSet.getBoolean(11));
-                personalBookings.add(booking);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return personalBookings;
-    }
-
-    public static ArrayList<Booking> queryPersonalActiveBookings(User user) {
-        if (user == null) {
-            return new ArrayList<>();
-        }
-        ArrayList<Booking> personalActiveBookings = new ArrayList<>();
-        ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
-        for (Booking b : bookings) {
-            if (!b.isCompleted() && !b.isDeleted()) {
-                personalActiveBookings.add(b);
-            }
-        }
-
-        return personalActiveBookings;
-    }
-
-    public static ArrayList<Booking> queryPersonalCompletedBookings(User user) {
-        if (user == null) {
-            return new ArrayList<>();
-        }
-
-        ArrayList<Booking> personalCompletedBookings = new ArrayList<>();
-        ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
-        for (Booking b : bookings) {
-            if (b.isCompleted()) {
-                personalCompletedBookings.add(b);
-            }
-        }
-
-        return personalCompletedBookings;
-    }
-
-    public static ArrayList<Booking> queryPersonalDeletedBookings(User user) {
-        if (user == null) {
-            return new ArrayList<>();
-        }
-        ArrayList<Booking> personalDeletedBookings = new ArrayList<>();
-        ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
-        for (Booking b : bookings) {
-            if (b.isDeleted()) {
-                personalDeletedBookings.add(b);
-            }
-        }
-
-        return personalDeletedBookings;
-    }
-
-    public static boolean insertBooking(User user, TimeSlot timeSlot, Teacher teacher, Course course) {
-        if (user == null || timeSlot == null || teacher == null || course == null) {
-            return false;
-        }
-
-        Connection connection = null;
-        int rowAffected = 0;
-
-        int idUser = getIdUser(user.getEmail());
-        int idTimeSlot = getIdTimeSlot(timeSlot.getDay(), timeSlot.getHour());
-        int idTeacher = getIdTeacher(teacher.getEmail());
-        int idCourse = getIdCourse(course.getTitle());
-
-        if (idUser != 0 && idTimeSlot != 0 && idTeacher != 0 && idCourse != 0) {
             try {
                 connection = DAO.connect();
-                PreparedStatement statement = connection.prepareStatement("insert into booking (IdUser, IdTimeSlot, IdTeacher, IdCourse) values (?, ?, ?, ?)");
-                statement.setInt(1, idUser);
-                statement.setInt(2, idTimeSlot);
-                statement.setInt(3, idTeacher);
-                statement.setInt(4, idCourse);
-                rowAffected = statement.executeUpdate();
+                PreparedStatement statement = connection.prepareStatement("select ts.IdTimeSlot, ts.Day, ts.Hour, " +
+                        "t.idTeacher, t.Name, t.Surname, t.Email, " +
+                        "c.idCourse, c.Title, Deleted, Completed\n" +
+                        "from booking\n" +
+                        "         join user u on u.IdUser = booking.IdUser\n" +
+                        "         join time_slot ts on ts.IdTimeSlot = booking.IdTimeSlot\n" +
+                        "         join teacher_course tc on tc.IdTeacher = booking.IdTeacher and tc.IdCourse = booking.IdCourse\n" +
+                        "         join teacher t on t.IdTeacher = tc.IdTeacher\n" +
+                        "         join course c on c.IdCourse = tc.IdCourse\n" +
+                        "where u.Email = ?;");
+                statement.setString(1, user.getEmail());
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    TimeSlot timeSlot = new TimeSlot(resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3));
+                    Teacher teacher = new Teacher(resultSet.getInt(4), resultSet.getString(5), resultSet.getString(6), resultSet.getString(7));
+                    Course course = new Course(resultSet.getInt(8), resultSet.getString(9));
+                    TeacherCourse teacherCourse = new TeacherCourse(teacher, course);
+
+                    Booking booking = new Booking(timeSlot, teacherCourse, resultSet.getBoolean(10), resultSet.getBoolean(11));
+                    personalBookings.add(booking);
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
@@ -1125,19 +1108,112 @@ public class DAO {
                     }
                 }
             }
+
+            return personalBookings;
+        } else {
+            return new ArrayList<>();
+        }
+
+    }
+
+    public static ArrayList<Booking> queryPersonalActiveBookings(User user) {
+        if (user != null && Validator.validateEmail(user.getEmail())) {
+            ArrayList<Booking> personalActiveBookings = new ArrayList<>();
+            ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
+            for (Booking b : bookings) {
+                if (!b.isCompleted() && !b.isDeleted()) {
+                    personalActiveBookings.add(b);
+                }
+            }
+
+            return personalActiveBookings;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public static ArrayList<Booking> queryPersonalCompletedBookings(User user) {
+        if (user != null && Validator.validateEmail(user.getEmail())) {
+            ArrayList<Booking> personalCompletedBookings = new ArrayList<>();
+            ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
+            for (Booking b : bookings) {
+                if (b.isCompleted()) {
+                    personalCompletedBookings.add(b);
+                }
+            }
+
+            return personalCompletedBookings;
+        } else {
+            return new ArrayList<>();
+        }
+
+    }
+
+    public static ArrayList<Booking> queryPersonalDeletedBookings(User user) {
+        if (user != null && Validator.validateEmail(user.getEmail())) {
+            ArrayList<Booking> personalDeletedBookings = new ArrayList<>();
+            ArrayList<Booking> bookings = DAO.queryPersonalBookings(user);
+            for (Booking b : bookings) {
+                if (b.isDeleted()) {
+                    personalDeletedBookings.add(b);
+                }
+            }
+
+            return personalDeletedBookings;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public static boolean insertBooking(User user, TimeSlot timeSlot, Teacher teacher, Course course) {
+        if (user != null && Validator.validateEmail(user.getEmail()) && timeSlot != null && teacher != null && Validator.validateEmail(teacher.getEmail()) && course != null) {
+            Connection connection = null;
+            int rowAffected = 0;
+
+            int idUser = getIdUser(user.getEmail());
+            int idTimeSlot = getIdTimeSlot(timeSlot.getDay(), timeSlot.getHour());
+            int idTeacher = getIdTeacher(teacher.getEmail());
+            int idCourse = getIdCourse(course.getTitle());
+
+            if (idUser != 0 && idTimeSlot != 0 && idTeacher != 0 && idCourse != 0) {
+                try {
+                    connection = DAO.connect();
+                    PreparedStatement statement = connection.prepareStatement("insert into booking (IdUser, IdTimeSlot, IdTeacher, IdCourse) values (?, ?, ?, ?)");
+                    statement.setInt(1, idUser);
+                    statement.setInt(2, idTimeSlot);
+                    statement.setInt(3, idTeacher);
+                    statement.setInt(4, idCourse);
+                    rowAffected = statement.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (connection != null) {
+                        try {
+                            connection.close();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } else {
+                return false;
+            }
+
+            return rowAffected != 0;
         } else {
             return false;
         }
 
-        return rowAffected != 0;
     }
 
     public static boolean deleteBooking(Booking booking) {
-        return booking != null && changeBookingStatus(booking, true, false);
+        boolean validBooking = booking != null && Validator.validateEmail(booking.getUser().getEmail()) && Validator.validateEmail(booking.getTeacherCourse().getTeacher().getEmail());
+        return validBooking && changeBookingStatus(booking, true, false);
     }
 
     public static boolean completeBooking(Booking booking) {
-        return booking != null && changeBookingStatus(booking, false, true);
+        boolean validBooking = booking != null && Validator.validateEmail(booking.getUser().getEmail()) && Validator.validateEmail(booking.getTeacherCourse().getTeacher().getEmail());
+        return validBooking && changeBookingStatus(booking, false, true);
     }
 
     private static boolean changeBookingStatus(Booking booking, boolean deletedStatus, boolean completedStatus) {

@@ -94,7 +94,7 @@ export default {
     ...mapGetters({
       ActiveCourseList: "StateActiveCourses",
       FilteredTeacherList: "StateActiveTeacherByCourse",
-      FilteredTimeSlotList: "StateTeacherAvailabilities",
+      FilteredTimeSlotList: "StateBookingAvailabilities",
     }),
 
     courses() {
@@ -107,21 +107,23 @@ export default {
     teachers() {
       if (this.FilteredTeacherList === null) {
         return [];
+      } else {
+        return this.FilteredTeacherList.map((teacher) => ({
+          text: teacher.name + " " + teacher.surname,
+          value: teacher,
+        }));
       }
-      return this.FilteredTeacherList.map((teacher) => ({
-        text: teacher.name + " " + teacher.surname,
-        value: teacher,
-      }));
     },
 
     timeSlots() {
       if (this.FilteredTimeSlotList === null) {
         return [];
+      } else {
+        return this.FilteredTimeSlotList.map((timeSlot) => ({
+          text: timeSlot.day + " " + timeSlot.hour,
+          value: timeSlot,
+        }));
       }
-      return this.FilteredTimeSlotList.map((timeSlot) => ({
-        text: timeSlot.day + " " + timeSlot.hour,
-        value: timeSlot,
-      }));
     },
   },
 
@@ -129,7 +131,7 @@ export default {
     ...mapActions([
       "GetActiveCourses",
       "GetActiveTeacherByCourse",
-      "GetTeacherAvailability",
+      "GetBookingAvailability",
       "InsertBooking",
     ]),
 
@@ -158,7 +160,7 @@ export default {
         teacherEmail: this.teacher.email,
       };
       try {
-        await this.GetTeacherAvailability(Teacher);
+        await this.GetBookingAvailability(Teacher);
         this.timeSlotDisabled = false;
       } catch {
         console.log("ERROR");

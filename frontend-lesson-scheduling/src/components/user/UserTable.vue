@@ -172,11 +172,19 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.userList.length;
+    if (this.userList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.userList.length;
+    }
   },
 
   beforeUpdate() {
-    this.totalRows = this.userList.length;
+    if (this.userList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.userList.length;
+    }
   },
 
   computed: {

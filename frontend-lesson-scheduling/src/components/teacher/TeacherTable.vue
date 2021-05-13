@@ -172,11 +172,19 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.teacherList.length;
+    if (this.teacherList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.teacherList.length;
+    }
   },
 
   beforeUpdate() {
-    this.totalRows = this.teacherList.length;
+    if (this.teacherList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.teacherList.length;
+    }
   },
 
   computed: {

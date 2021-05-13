@@ -170,11 +170,19 @@ export default {
   },
 
   mounted() {
-    this.totalRows = this.courseList.length;
+    if (this.courseList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.courseList.length;
+    }
   },
 
   beforeUpdate() {
-    this.totalRows = this.courseList.length;
+    if (this.courseList === null) {
+      this.totalRows = 0;
+    } else {
+      this.totalRows = this.courseList.length;
+    }
   },
 
   computed: {

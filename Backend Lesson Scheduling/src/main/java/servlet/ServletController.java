@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * @author Raul Palade
@@ -41,7 +42,6 @@ public class ServletController extends HttpServlet {
         }
     }
 
-    // TODO (2): Controllare che il JSON non sia vuoto altrimenti la servlet risponderà con codice
     private String readJSONRequest(HttpServletRequest request) throws IOException {
         StringBuilder buffer = new StringBuilder();
         BufferedReader reader = request.getReader();
@@ -50,9 +50,9 @@ public class ServletController extends HttpServlet {
             buffer.append(line);
             buffer.append(System.lineSeparator());
         }
-
         return buffer.toString();
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -124,7 +124,7 @@ public class ServletController extends HttpServlet {
                         if (DAO.insertUser(newUser)) {
                             response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
-                            if (DAO.checkIfUserExists(new User(userName, userSurname, userEmail, password, administrator))) {
+                            if (DAO.checkIfUserExists(new User(userEmail))) {
                                 DAO.activateUser(newUser);
                             }
                         }
@@ -194,7 +194,7 @@ public class ServletController extends HttpServlet {
                         if (DAO.insertTeacher(newTeacher)) {
                             response.setStatus(HttpServletResponse.SC_CREATED);
                         } else {
-                            if (DAO.checkIfTeacherExists(new Teacher(teacherName, teacherSurname, teacherEmail, password))) {
+                            if (DAO.checkIfTeacherExists(new Teacher(teacherEmail))) {
                                 DAO.activateTeacher(newTeacher);
                             }
                         }
@@ -513,6 +513,8 @@ public class ServletController extends HttpServlet {
                     } else {
                         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     }
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 break;
 
@@ -578,13 +580,36 @@ public class ServletController extends HttpServlet {
                 teacherEmail = jsonObject.get("teacherEmail").getAsString();
 
                 if (teacherEmail != null && !teacherEmail.isBlank()) {
-                    ArrayList<TimeSlot> timeSlots = DAO.queryTeacherAvailability(new Teacher(teacherEmail));
+                    Set<TimeSlot> timeSlots = DAO.queryTeacherAvailability(new Teacher(teacherEmail));
                     out.println(gson.toJson(timeSlots));
                     out.flush();
                 } else {
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 }
                 break;
+
+            case "list-booking-availability":
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                userEmail = request.getSession().getAttribute("emailUser").toString();
+
+                if (isLogged(request)) {
+                    if (teacherEmail != null && !teacherEmail.isBlank()) {
+                        Set<TimeSlot> timeSlotsTeacher = DAO.queryTeacherAvailability(new Teacher(teacherEmail));
+                        Set<TimeSlot> timeSlotsUser = DAO.queryUserAvailability(new User(userEmail));
+                        timeSlotsTeacher.retainAll(timeSlotsUser);
+                        System.out.println(gson.toJson(timeSlotsTeacher));
+                        out.println(gson.toJson(timeSlotsTeacher));
+                        out.flush();
+                    } else {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    }
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+                break;
+
 
             default:
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
