@@ -203,13 +203,13 @@ export default {
         this.makeToast(
           "success",
           "Operazione completata",
-          "Il nuovo slot orario è stato registrato correttamente"
+          "Il docente è stato rimosso dal corso correttamente"
         );
       } catch {
         this.makeToast(
           "danger",
           "Operazione completata",
-          "Impossibile registrare il nuovo slot orario al momento"
+          "Impossibile rimuovere il docente dal corso al momento"
         );
       }
     },
@@ -227,13 +227,13 @@ export default {
         this.makeToast(
           "success",
           "Operazione completata",
-          "Il nuovo slot orario è stato registrato correttamente"
+          "Il corso è stato riassegnato al docente correttamente"
         );
       } catch {
         this.makeToast(
           "danger",
           "Operazione completata",
-          "Impossibile registrare il nuovo slot orario al momento"
+          "Impossibile riassegnare il corso al docente al momento"
         );
       }
     },

@@ -57,7 +57,7 @@ public class ServletController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html");
+        response.setContentType("application/json");
         PrintWriter out = response.getWriter();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -101,7 +101,6 @@ public class ServletController extends HttpServlet {
                 break;
 
             case "logout":
-                response.setContentType("text/html");
                 HttpSession session = request.getSession(false);
                 if (session != null) {
                     session.invalidate();
@@ -364,7 +363,6 @@ public class ServletController extends HttpServlet {
                         if (DAO.deactivateTimeSlot(new TimeSlot(day, hour))) {
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
-
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         }
                     } else {
@@ -426,86 +424,6 @@ public class ServletController extends HttpServlet {
 
                     if (teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
                         if (DAO.deactivateTeaching(new TeacherCourse(new Teacher(teacherEmail), new Course(title)))) {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        } else {
-                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        }
-                    } else {
-                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                    }
-                } else {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                }
-                break;
-
-            case "insert-booking":
-                if (isLogged(request)) {
-                    jsonString = readJSONRequest(request);
-                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                    userEmail = request.getSession().getAttribute("emailUser").toString();
-                    day = jsonObject.get("day").getAsString();
-                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
-                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
-                    title = jsonObject.get("title").getAsString();
-
-                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                        if (DAO.insertBooking(new User(userEmail), new TimeSlot(day, hour), new Teacher(teacherEmail), new Course(title))) {
-                            response.setStatus(HttpServletResponse.SC_CREATED);
-                        } else {
-                            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                        }
-                    } else {
-                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                    }
-                } else {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                }
-                break;
-
-            case "delete-booking":
-                if (isLogged(request)) {
-                    jsonString = readJSONRequest(request);
-                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                    if (jsonObject.has("userEmail")) {
-                        userEmail = jsonObject.get("userEmail").getAsString();
-                    } else {
-                        userEmail = request.getSession().getAttribute("emailUser").toString();
-                    }
-                    day = jsonObject.get("day").getAsString();
-                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
-                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
-                    title = jsonObject.get("title").getAsString();
-
-                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                        if (DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        } else {
-                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        }
-                    } else {
-                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                    }
-                } else {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                }
-                break;
-
-            case "complete-booking":
-                if (isLogged(request)) {
-                    jsonString = readJSONRequest(request);
-                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                    if (jsonObject.has("userEmail")) {
-                        userEmail = jsonObject.get("userEmail").getAsString();
-                    } else {
-                        userEmail = request.getSession().getAttribute("emailUser").toString();
-                    }
-                    day = jsonObject.get("day").getAsString();
-                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
-                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
-                    title = jsonObject.get("title").getAsString();
-
-                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
-                        if (DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
                             response.setStatus(HttpServletResponse.SC_OK);
                         } else {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -588,6 +506,30 @@ public class ServletController extends HttpServlet {
                 }
                 break;
 
+            case "insert-booking":
+                if (isLogged(request)) {
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    userEmail = request.getSession().getAttribute("emailUser").toString();
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
+
+                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
+                        if (DAO.insertBooking(new User(userEmail), new TimeSlot(day, hour), new Teacher(teacherEmail), new Course(title))) {
+                            response.setStatus(HttpServletResponse.SC_CREATED);
+                        } else {
+                            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                        }
+                    } else {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    }
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+                break;
+
             case "list-booking-availability":
                 jsonString = readJSONRequest(request);
                 jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
@@ -599,7 +541,6 @@ public class ServletController extends HttpServlet {
                         Set<TimeSlot> timeSlotsTeacher = DAO.queryTeacherAvailability(new Teacher(teacherEmail));
                         Set<TimeSlot> timeSlotsUser = DAO.queryUserAvailability(new User(userEmail));
                         timeSlotsTeacher.retainAll(timeSlotsUser);
-                        System.out.println(gson.toJson(timeSlotsTeacher));
                         out.println(gson.toJson(timeSlotsTeacher));
                         out.flush();
                     } else {
@@ -610,10 +551,64 @@ public class ServletController extends HttpServlet {
                 }
                 break;
 
+            case "delete-booking":
+                if (isLogged(request)) {
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    if (jsonObject.has("userEmail")) {
+                        userEmail = jsonObject.get("userEmail").getAsString();
+                    } else {
+                        userEmail = request.getSession().getAttribute("emailUser").toString();
+                    }
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
+
+                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
+                        if (DAO.deleteBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        } else {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        }
+                    } else {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    }
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+                break;
+
+            case "complete-booking":
+                if (isLogged(request)) {
+                    jsonString = readJSONRequest(request);
+                    jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    if (jsonObject.has("userEmail")) {
+                        userEmail = jsonObject.get("userEmail").getAsString();
+                    } else {
+                        userEmail = request.getSession().getAttribute("emailUser").toString();
+                    }
+                    day = jsonObject.get("day").getAsString();
+                    hour = Integer.parseInt(jsonObject.get("hour").getAsString());
+                    teacherEmail = jsonObject.get("teacherEmail").getAsString();
+                    title = jsonObject.get("title").getAsString();
+
+                    if (userEmail != null && !userEmail.isBlank() && day != null && !day.isBlank() && !String.valueOf(hour).isBlank() && teacherEmail != null && !teacherEmail.isBlank() && title != null && !title.isBlank()) {
+                        if (DAO.completeBooking(new Booking(new User(userEmail), new TimeSlot(day, hour), new TeacherCourse(new Teacher(teacherEmail), new Course(title))))) {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        } else {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        }
+                    } else {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    }
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+                break;
 
             default:
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-
         }
     }
 

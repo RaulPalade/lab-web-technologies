@@ -6,7 +6,6 @@
     img-top
     id="course-card"
   >
-    <!-- <b-button id="btn">Prenota</b-button> -->
   </b-card>
 </template>
 <script>
@@ -19,26 +18,17 @@ export default {
   },
 };
 </script>
-<style>
+<style scoped>
 #course-card {
   height: 330px;
   transition: 0.5s all ease-in-out;
 }
 
+h4.card-title {
+  color: #017d91;
+}
+
 #course-card:hover {
   box-shadow: 0 8px 6px -6px #60d69a;
-}
-
-#course-card #btn {
-  margin-bottom: 0;
-}
-
-#btn {
-  background: #017d91;
-  border-style: none;
-}
-
-#btn:hover {
-  background: #60d69a;
 }
 </style>

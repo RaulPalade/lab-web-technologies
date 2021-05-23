@@ -10,11 +10,27 @@
               :key="course.id"
               class="p-2"
             >
-              <p>
-                <router-link :to="'/course/' + course.title">
-                  <CourseCard :course="course" />
-                </router-link>
-              </p>
+              <span v-if="isAdmin">
+                <p>
+                  <router-link to="/adminDashboard">
+                    <CourseCard :course="course" />
+                  </router-link>
+                </p>
+              </span>
+              <span v-else-if="isLoggedIn">
+                <p>
+                  <router-link to="/userDashboard">
+                    <CourseCard :course="course" />
+                  </router-link>
+                </p>
+              </span>
+              <span v-else>
+                <p>
+                  <router-link to="/login">
+                    <CourseCard :course="course" />
+                  </router-link>
+                </p>
+              </span>
             </slide>
           </carousel>
         </b-col>
@@ -38,11 +54,18 @@ export default {
       sliding: null,
     };
   },
+
   created: function() {
     this.GetActiveCourses();
   },
   computed: {
     ...mapGetters({ courses: "StateActiveCourses", User: "StateUser" }),
+    isLoggedIn: function() {
+      return this.$store.getters.isAuthenticated;
+    },
+    isAdmin: function() {
+      return this.$store.getters.isAdmin;
+    },
   },
   methods: {
     ...mapActions(["GetActiveCourses"]),

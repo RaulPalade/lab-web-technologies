@@ -238,7 +238,7 @@ export default {
         this.makeToast(
           "danger",
           "Errore",
-          "Impossibile marcare la prenotazione come completata"
+          "Impossibile segnare la prenotazione come completata"
         );
       }
     },

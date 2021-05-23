@@ -135,13 +135,13 @@ export default {
         this.makeToast(
           "success",
           "Operazione completata",
-          "Il nuovo slot orario è stato registrato correttamente"
+          "Il corso è stato assegnato al docente correttamente"
         );
       } catch {
         this.makeToast(
           "danger",
           "Operazione completata",
-          "Impossibile registrare il nuovo slot orario al momento"
+          "Impossibile assegnare il corso al docente al momento"
         );
       }
     },

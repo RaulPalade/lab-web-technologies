@@ -12,22 +12,24 @@
               <router-link
                 to="/adminDashboard"
                 class="navbar-item nav-link nav-link-ltr"
-                >Dashboard</router-link
               >
+                Dashboard
+              </router-link>
             </span>
             <span v-else>
               <router-link
                 to="/UserDashboard"
                 class="navbar-item nav-link nav-link-ltr"
-                >Dashboard</router-link
               >
+                Dashboard
+              </router-link>
             </span>
           </b-nav-item>
 
           <b-nav-item>
-            <router-link to="/about" class="navbar-item nav-link nav-link-ltr"
-              >About</router-link
-            >
+            <router-link to="/about" class="navbar-item nav-link nav-link-ltr">
+              About
+            </router-link>
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>
@@ -63,11 +65,12 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .nav-link {
   text-decoration: none;
   text-transform: capitalize;
   position: relative;
+  margin-right: 0.8rem;
 }
 
 .nav-link:hover {
@@ -88,7 +91,7 @@ export default {
 }
 
 .nav-link-ltr:hover::before {
-  width: 100%;
+  width: 90%;
 }
 
 #btn-login {

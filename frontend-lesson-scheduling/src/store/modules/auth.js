@@ -8,6 +8,7 @@ const state = {
     activeTeachers: null,
     deactivatedTeachers: null,
     teacherAvailabilities: null,
+    bookingAvailabilities: null,
     activeCourses: null,
     deactivatedCourses: null,
     teacherCourses: null,
@@ -36,6 +37,7 @@ const getters = {
     StateActiveTeachers: state => state.activeTeachers,
     StateDeactivatedTeachers: state => state.deactivatedTeachers,
     StateTeacherAvailabilities: state => state.teacherAvailabilities,
+    StateBookingAvailabilities: state => state.bookingAvailabilities,
     StateActiveCourses: state => state.activeCourses,
     StateDeactivatedCourses: state => state.deactivatedCourses,
     StateTeacherCourses: state => state.teacherCourses,
@@ -56,6 +58,7 @@ const getters = {
 }
 
 const actions = {
+
     // POST METHODS
     async LogIn({
         commit
@@ -69,8 +72,7 @@ const actions = {
         commit
     }) {
         await axios.post('http://localhost:8080/ServletController?action=logout')
-        let user = null
-        await commit('logoutUser', user)
+        await commit('logoutUser')
     },
 
     async InsertUser({
@@ -187,49 +189,6 @@ const actions = {
         await dispatch('GetActiveTeacherByCourse', Course)
     },
 
-    async DeactivateTeaching({
-        dispatch
-    }, TeacherCourse) {
-        const Course = {
-            title: TeacherCourse.title
-        }
-        await axios.post('http://localhost:8080/ServletController?action=deactivate-teaching', TeacherCourse)
-        await dispatch('GetActiveTeacherByCourse', Course)
-        await dispatch('GetDeactivatedTeacherByCourse', Course)
-    },
-
-    async InsertBooking({
-        dispatch
-    }, Booking) {
-        await axios.post('http://localhost:8080/ServletController?action=insert-booking', Booking)
-        await dispatch("GetAllActiveBookings")
-    },
-
-    // TODO: Sistemare le chiamate alla lista delle prenotazioni
-    async DeleteBooking({
-        dispatch
-    }, Booking) {
-        await axios.post('http://localhost:8080/ServletController?action=delete-booking', Booking)
-        await dispatch("GetAllActiveBookings")
-        await dispatch("GetAllCompletedBookings")
-        await dispatch("GetAllDeletedBookings")
-        await dispatch("GetPersonalActiveBooking")
-        await dispatch("GetPersonalCompletedBooking")
-        await dispatch("GetPersonalDeletedBooking")
-    },
-
-    async CompleteBooking({
-        dispatch
-    }, Booking) {
-        await axios.post('http://localhost:8080/ServletController?action=complete-booking', Booking)
-        await dispatch("GetAllActiveBookings")
-        await dispatch("GetAllCompletedBookings")
-        await dispatch("GetAllDeletedBookings")
-        await dispatch("GetPersonalActiveBooking")
-        await dispatch("GetPersonalCompletedBooking")
-        await dispatch("GetPersonalDeletedBooking")
-    },
-
     async GetActiveTeacherByCourse({
         commit
     }, Course) {
@@ -264,6 +223,67 @@ const actions = {
         let teacherAvailabilities = await axios.post('http://localhost:8080/ServletController?action=list-teacher-availability', Teacher)
         await commit('setTeacherAvailabilities', teacherAvailabilities.data)
     },
+
+    async DeactivateTeaching({
+        dispatch
+    }, TeacherCourse) {
+        const Course = {
+            title: TeacherCourse.title
+        }
+        await axios.post('http://localhost:8080/ServletController?action=deactivate-teaching', TeacherCourse)
+        await dispatch('GetActiveTeacherByCourse', Course)
+        await dispatch('GetDeactivatedTeacherByCourse', Course)
+    },
+
+    async InsertBooking({
+        dispatch
+    }, Booking) {
+        await axios.post('http://localhost:8080/ServletController?action=insert-booking', Booking)
+        if (state.isAdmin) {
+            await dispatch("GetAllActiveBookings")
+            await dispatch("GetAllCompletedBookings")
+            await dispatch("GetAllDeletedBookings")
+        }
+        await dispatch("GetPersonalActiveBooking")
+        await dispatch("GetPersonalCompletedBooking")
+        await dispatch("GetPersonalDeletedBooking")
+    },
+
+    async DeleteBooking({
+        dispatch
+    }, Booking) {
+        await axios.post('http://localhost:8080/ServletController?action=delete-booking', Booking)
+        if (state.isAdmin) {
+            await dispatch("GetAllActiveBookings")
+            await dispatch("GetAllCompletedBookings")
+            await dispatch("GetAllDeletedBookings")
+        }
+        await dispatch("GetPersonalActiveBooking")
+        await dispatch("GetPersonalCompletedBooking")
+        await dispatch("GetPersonalDeletedBooking")
+    },
+
+    async CompleteBooking({
+        dispatch
+    }, Booking) {
+        await axios.post('http://localhost:8080/ServletController?action=complete-booking', Booking)
+        if (state.isAdmin) {
+            await dispatch("GetAllActiveBookings")
+            await dispatch("GetAllCompletedBookings")
+            await dispatch("GetAllDeletedBookings")
+        }
+        await dispatch("GetPersonalActiveBooking")
+        await dispatch("GetPersonalCompletedBooking")
+        await dispatch("GetPersonalDeletedBooking")
+    },
+
+    async GetBookingAvailability({
+        commit
+    }, Teacher) {
+        let bookingAvailability = await axios.post('http://localhost:8080/ServletController?action=list-booking-availability', Teacher)
+        await commit('setBookingAvailabilities', bookingAvailability.data)
+    },
+
 
     // GET METHODS
     async GetActiveUsers({
@@ -417,6 +437,10 @@ const mutations = {
 
     setTeacherAvailabilities(state, teacherAvailabilities) {
         state.teacherAvailabilities = teacherAvailabilities
+    },
+
+    setBookingAvailabilities(state, bookingAvailabilities) {
+        state.bookingAvailabilities = bookingAvailabilities
     },
 
     setActiveCourses(state, activeCourses) {

@@ -22,7 +22,6 @@ public class DAO {
     public static void registerDriver() {
         try {
             DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
-            System.out.println("Driver registered correctly");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -191,7 +190,6 @@ public class DAO {
             try {
                 connection = DAO.connect();
                 String hashedPassword = BCrypt.hashpw(user.getPassword(), salt);
-                System.out.println(hashedPassword);
                 PreparedStatement statement = connection.prepareStatement("insert into user (Name, Surname, Email, Password, Administrator) values (?, ?, ?, ?, ?)");
                 statement.setString(1, user.getName());
                 statement.setString(2, user.getSurname());

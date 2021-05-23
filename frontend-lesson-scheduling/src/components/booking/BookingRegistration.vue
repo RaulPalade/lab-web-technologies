@@ -182,13 +182,13 @@ export default {
         this.makeToast(
           "success",
           "Operazione completata",
-          "Il nuovo slot orario è stato registrato correttamente"
+          "La prenotazione è stato aggiunta"
         );
       } catch {
         this.makeToast(
           "danger",
           "Operazione completata",
-          "Impossibile registrare il nuovo slot orario al momento"
+          "Impossibile aggiungere la nuova prenotazione"
         );
       }
     },
