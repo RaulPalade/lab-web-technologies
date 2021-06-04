@@ -33,13 +33,6 @@ const routes = [{
     meta: {
       requiresAuth: true,
     },
-    beforeEnter(to, from, next) {
-      if (store.getters.isAdmin) {
-        next({
-          name: "AdminDashboard"
-        })
-      }
-    }
   },
   {
     path: "/about",

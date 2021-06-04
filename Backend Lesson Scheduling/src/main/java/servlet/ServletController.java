@@ -511,6 +511,7 @@ public class ServletController extends HttpServlet {
                     jsonString = readJSONRequest(request);
                     jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
                     userEmail = request.getSession().getAttribute("emailUser").toString();
+                    //FOR ANDROID userEmail = jsonObject.get("userEmail").getAsString();
                     day = jsonObject.get("day").getAsString();
                     hour = Integer.parseInt(jsonObject.get("hour").getAsString());
                     teacherEmail = jsonObject.get("teacherEmail").getAsString();
@@ -555,11 +556,8 @@ public class ServletController extends HttpServlet {
                 if (isLogged(request)) {
                     jsonString = readJSONRequest(request);
                     jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                    if (jsonObject.has("userEmail")) {
-                        userEmail = jsonObject.get("userEmail").getAsString();
-                    } else {
-                        userEmail = request.getSession().getAttribute("emailUser").toString();
-                    }
+                    userEmail = request.getSession().getAttribute("emailUser").toString();
+                    //FOR ANDROID userEmail = jsonObject.get("userEmail").getAsString();
                     day = jsonObject.get("day").getAsString();
                     hour = Integer.parseInt(jsonObject.get("hour").getAsString());
                     teacherEmail = jsonObject.get("teacherEmail").getAsString();
@@ -583,11 +581,8 @@ public class ServletController extends HttpServlet {
                 if (isLogged(request)) {
                     jsonString = readJSONRequest(request);
                     jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                    if (jsonObject.has("userEmail")) {
-                        userEmail = jsonObject.get("userEmail").getAsString();
-                    } else {
-                        userEmail = request.getSession().getAttribute("emailUser").toString();
-                    }
+                    userEmail = request.getSession().getAttribute("emailUser").toString();
+                    //FOR ANDROID userEmail = jsonObject.get("userEmail").getAsString();
                     day = jsonObject.get("day").getAsString();
                     hour = Integer.parseInt(jsonObject.get("hour").getAsString());
                     teacherEmail = jsonObject.get("teacherEmail").getAsString();
@@ -605,6 +600,66 @@ public class ServletController extends HttpServlet {
                 } else {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
+                break;
+
+            // TODO: add isLogged
+            case "list-personal-bookings":
+                // FOR ANDROID
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                userEmail = jsonObject.get("emailUser").getAsString();
+
+                // FOR WEB
+                //userEmail = request.getSession().getAttribute("emailUser").toString();
+
+                ArrayList<Booking> personalBookings = DAO.queryPersonalBookings(new User(userEmail));
+                out.println(gson.toJson(personalBookings));
+                out.flush();
+                break;
+
+            // TODO: add isLogged
+            case "list-personal-active-bookings":
+                // FOR ANDROID
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                userEmail = jsonObject.get("emailUser").getAsString();
+
+                // FOR WEB
+                //userEmail = request.getSession().getAttribute("emailUser").toString();
+
+                ArrayList<Booking> personalActiveBookings = DAO.queryPersonalActiveBookings(new User(userEmail));
+                out.println(gson.toJson(personalActiveBookings));
+                out.flush();
+                break;
+
+            // TODO: add isLogged
+            case "list-personal-completed-bookings":
+                // FOR ANDROID
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                userEmail = jsonObject.get("emailUser").getAsString();
+
+                // FOR WEB
+                //userEmail = request.getSession().getAttribute("emailUser").toString();
+
+                ArrayList<Booking> personalCompletedBookings = DAO.queryPersonalCompletedBookings(new User(userEmail));
+                out.println(gson.toJson(personalCompletedBookings));
+                out.flush();
+                break;
+
+            // TODO: add isLogged
+            case "list-personal-deleted-bookings":
+                // FOR ANDROID
+                jsonString = readJSONRequest(request);
+                jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                userEmail = jsonObject.get("emailUser").getAsString();
+
+                // FOR WEB
+                //userEmail = request.getSession().getAttribute("emailUser").toString();
+
+                ArrayList<Booking> personalDeletedBookings = DAO.queryPersonalDeletedBookings(new User(userEmail));
+                out.println(gson.toJson(personalDeletedBookings));
+                out.flush();
                 break;
 
             default:
@@ -711,58 +766,11 @@ public class ServletController extends HttpServlet {
                 }
                 break;
 
-            case "list-personal-bookings":
-                if (isLogged(request)) {
-                    String thisUser = request.getSession().getAttribute("emailUser").toString();
-                    ArrayList<Booking> personalBookings = DAO.queryPersonalBookings(new User(thisUser));
-                    out.println(gson.toJson(personalBookings));
-                    out.flush();
-                } else {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                }
-                break;
-
-            case "list-personal-active-bookings":
-                if (isLogged(request)) {
-                    String thisUser = request.getSession().getAttribute("emailUser").toString();
-                    ArrayList<Booking> personalActiveBookings = DAO.queryPersonalActiveBookings(new User(thisUser));
-                    out.println(gson.toJson(personalActiveBookings));
-                    out.flush();
-                } else {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                }
-                break;
-
-            case "list-personal-completed-bookings":
-                if (isLogged(request)) {
-                    String thisUser = request.getSession().getAttribute("emailUser").toString();
-                    ArrayList<Booking> personalCompletedBookings = DAO.queryPersonalCompletedBookings(new User(thisUser));
-                    out.println(gson.toJson(personalCompletedBookings));
-                    out.flush();
-                } else {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                }
-                break;
-
-            case "list-personal-deleted-bookings":
-                if (isLogged(request)) {
-                    String thisUser = request.getSession().getAttribute("emailUser").toString();
-                    ArrayList<Booking> personalDeletedBookings = DAO.queryPersonalDeletedBookings(new User(thisUser));
-                    out.println(gson.toJson(personalDeletedBookings));
-                    out.flush();
-                } else {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                }
-                break;
-
+            // TODO: add isLogged
             case "list-active-time-slots":
-                if (isLogged(request)) {
-                    ArrayList<TimeSlot> activeTimeSlots = DAO.queryActiveTimeSlots();
-                    out.println(gson.toJson(activeTimeSlots));
-                    out.flush();
-                } else {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                }
+                ArrayList<TimeSlot> activeTimeSlots = DAO.queryActiveTimeSlots();
+                out.println(gson.toJson(activeTimeSlots));
+                out.flush();
                 break;
 
             case "list-deactivated-time-slots":

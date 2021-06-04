@@ -366,28 +366,29 @@ const actions = {
     async GetPersonalBooking({
         commit
     }, User) {
-        let personalBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-bookings', User)
+        let personalBookings = await axios.post('http://localhost:8080/ServletController?action=list-personal-bookings', User)
         await commit('setPersonalBookings', personalBookings.data)
     },
 
     async GetPersonalActiveBooking({
         commit
     }, User) {
-        let personalActiveBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-active-bookings', User)
+        let personalActiveBookings = await axios.post('http://localhost:8080/ServletController?action=list-personal-active-bookings', User)
+        console.log(personalActiveBookings.data)
         await commit('setPersonalActiveBookings', personalActiveBookings.data)
     },
 
     async GetPersonalCompletedBooking({
         commit
     }, User) {
-        let personalCompletedBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-completed-bookings', User)
+        let personalCompletedBookings = await axios.post('http://localhost:8080/ServletController?action=list-personal-completed-bookings', User)
         await commit('setPersonalCompletedBookings', personalCompletedBookings.data)
     },
 
     async GetPersonalDeletedBooking({
         commit
     }, User) {
-        let personalDeletedBookings = await axios.get('http://localhost:8080/ServletController?action=list-personal-deleted-bookings', User)
+        let personalDeletedBookings = await axios.post('http://localhost:8080/ServletController?action=list-personal-deleted-bookings', User)
         await commit('setPersonalDeletedBookings', personalDeletedBookings.data)
     },
 
