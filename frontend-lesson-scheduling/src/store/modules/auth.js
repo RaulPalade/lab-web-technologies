@@ -80,6 +80,7 @@ const actions = {
     }, newUser) {
         await axios.post('http://localhost:8080/ServletController?action=insert-user', newUser)
         await dispatch("GetActiveUsers")
+        await dispatch("GetDeactivatedUsers")
     },
 
     async ActivateUser({
@@ -103,6 +104,7 @@ const actions = {
     }, newTeacher) {
         await axios.post('http://localhost:8080/ServletController?action=insert-teacher', newTeacher)
         await dispatch("GetActiveTeachers")
+        await dispatch("GetDeactivatedTeachers")
     },
 
     async ActivateTeacher({
@@ -126,6 +128,7 @@ const actions = {
     }, newCourse) {
         await axios.post('http://localhost:8080/ServletController?action=insert-course', newCourse)
         await dispatch("GetActiveCourses")
+        await dispatch("GetDeactivatedCourses")
     },
 
     async ActivateCourse({
@@ -149,6 +152,7 @@ const actions = {
     }, newTimeSlot) {
         await axios.post('http://localhost:8080/ServletController?action=insert-time-slot', newTimeSlot)
         await dispatch("GetActiveTimeSlots")
+        await dispatch("GetDeactivatedTimeSlots")
     },
 
     async ActivateTimeSlot({

@@ -24,7 +24,6 @@
         >
       </form>
     </b-card>
-    <p v-if="showError" id="error">Email or Password is incorrect</p>
   </div>
 </template>
 
@@ -40,7 +39,6 @@ export default {
         email: "raul.palade@edu.unito.it",
         password: "password1",
       },
-      showError: false,
     };
   },
 
@@ -53,7 +51,17 @@ export default {
   methods: {
     ...mapActions(["LogIn"]),
 
-    async submit() {
+    makeToast(variant = null, title, content) {
+      this.$bvToast.toast(content, {
+        variant: variant,
+        title: title,
+        solid: true,
+      });
+    },
+
+    async submit(event) {
+      event.preventDefault();
+
       const User = {
         email: this.form.email,
         password: this.form.password,
@@ -65,11 +73,12 @@ export default {
         } else {
           this.$router.push("/userDashboard");
         }
-
-        this.showError = false;
       } catch (error) {
-        this.showError = true;
-        console.log(error);
+        this.makeToast(
+          "danger",
+          "Impossibile accedere",
+          "L'e-mail o la password non sono corretti"
+        );
       }
     },
   },

@@ -1,6 +1,10 @@
 <template>
-  <b-card :title="fullName" bg-variant="dark" text-variant="black">
-    <b-button id="btn">Prenota</b-button>
+  <b-card
+    :title="fullName"
+    bg-variant="white"
+    text-variant="black"
+    id="teacher-card"
+  >
   </b-card>
 </template>
 
@@ -16,4 +20,15 @@ export default {
 </script>
 
 <style>
+#teacher-card {
+  transition: 0.5s all ease-in-out;
+}
+
+h4.card-title {
+  color: #017d91;
+}
+
+#course-card:hover {
+  box-shadow: 0 8px 6px -6px #60d69a;
+}
 </style>
