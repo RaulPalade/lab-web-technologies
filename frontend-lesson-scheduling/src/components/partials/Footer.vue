@@ -3,7 +3,7 @@
     <b-card footer-tag="footer">
       <b-card-text>
         &copy; 2021, Online Lesson Scheduling,
-        <router-link to="/notelegali">Note Legali</router-link> <wbr />
+        <router-link to="/notelegali">Note Legali | </router-link> <wbr />
         <router-link to="/privacy">Privacy</router-link>
       </b-card-text>
     </b-card>
